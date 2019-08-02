@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charser='UTF-8'>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">	
+		<title> Output </title>
+		<style>
+			body{
+				background-color: rgba(0, 0, 0, 0);
+				font-family:roboto;
+				overflow: hidden;
+			}
+
+			.scroll-left,.header {	
+				overflow: hidden;
+				position: fixed;
+				width: 100%;
+				margin: 0;
+				top: 0;
+				background: url('https://tr.rbxcdn.com/558d263ab58bc6467a879a83a1fbf9ad/420/420/Decal/Png');
+				background-size: contain;
+				height: 1.3em;
+				font-size:20pt;
+				left:0;
+			}
+
+			.header *{
+				overflow: hidden;
+			}
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script>
+			$(Document).ready(function(){
+					setInterval(function(){
+						$.ajax({
+							type: 'GET',
+							url: 'levels.json',
+							data: { get_param: 'value' },
+							dataType: 'json',
+							cache:false,
+							success: function (data) {
+								$('#level').text('Level: ' + data[0].level);
+								$('#mb').text('By: ' + data[0].nick);
+							}
+						});
+					},2000);
+							
+			});
+		</script>
+		<body>
+			<!--
+				<div class='scroll-left' style='top:0;'>
+					
+				</div>
+			-->
+			<div class='header'>
+				<div id='level' style = 'position:absolute;left: 0;width:74%;'></div>
+				<div id='mb' style = 'position: absolute;right: 0;width:25%;text-align:right;'></div>
+			</div>
+		</body>
+	</head>
+</html>
