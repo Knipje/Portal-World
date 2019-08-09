@@ -1,62 +1,238 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<meta charser='UTF-8'>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">	
-		<title> Output </title>
-		<style>
-			body{
-				background-color: rgba(0, 0, 0, 0);
-				font-family:roboto;
-				overflow: hidden;
-			}
+<html lang="en">
 
-			.scroll-left,.header {	
-				overflow: hidden;
-				position: fixed;
-				width: 100%;
-				margin: 0;
-				top: 0;
-				background: url('https://tr.rbxcdn.com/558d263ab58bc6467a879a83a1fbf9ad/420/420/Decal/Png');
-				background-size: contain;
-				height: 1.3em;
-				font-size:20pt;
-				left:0;
-			}
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        html {
+            overflow: hidden;
+        }
 
-			.header *{
-				overflow: hidden;
-			}
-		</style>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-		<script>
-			$(Document).ready(function(){
-					setInterval(function(){
-						$.ajax({
-							type: 'GET',
-							url: 'levels.json',
-							data: { get_param: 'value' },
-							dataType: 'json',
-							cache:false,
-							success: function (data) {
-								$('#level').text('Level: ' + data[0].level);
-								$('#mb').text('By: ' + data[0].nick);
-							}
-						});
-					},2000);
-							
-			});
-		</script>
-		<body>
-			<!--
-				<div class='scroll-left' style='top:0;'>
-					
-				</div>
-			-->
-			<div class='header'>
-				<div id='level' style = 'position:absolute;left: 0;width:74%;'></div>
-				<div id='mb' style = 'position: absolute;right: 0;width:25%;text-align:right;'></div>
-			</div>
-		</body>
-	</head>
+        :root {
+            --green-key: #00b140;
+            --portal-blue: #29AAE2;
+            --portal-orange: #ED6B1E;
+            --light-gray: #dddddd;
+            --gray: #5a5a5a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+
+            font-size: 1.7rem;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        header {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%);
+
+            display: grid;
+            grid-template-columns: 1.5rem calc(100vw - 4rem) 1.5rem;
+        }
+
+        .content {
+            box-sizing: border-box;
+            padding: .3rem;
+
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+
+            background-color: var(--light-gray);
+            border-left: 5px solid var(--portal-orange);
+            border-right: 5px solid var(--portal-blue);
+        }
+
+        .levelName {
+            box-sizing: border-box;
+            margin: 2rem;
+            width: 65%;
+
+            padding-right: .5rem;
+            padding-left: .3rem;
+        }
+
+        .mid {
+            font-weight: bold;
+            text-align: center;
+
+            box-sizing: border-box;
+            height: 3rem;
+            padding: .5rem .7rem;
+            border-left: 3px solid var(--gray);
+        }
+
+        .end {
+            justify-self: end;
+        }
+
+        .madeBy {
+            width: 35%;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .marquee {
+            height: 2rem;
+            width: 100%;
+
+            overflow: hidden;
+            position: relative;
+        }
+
+        .marquee div {
+            display: block;
+            /* width: calc(100% * 2); */
+            width: 250%;
+            height: 2rem;
+            position: absolute;
+            overflow: hidden;
+
+            animation: marquee 10s linear infinite;
+        }
+
+        .marquee span {
+            float: left;
+            width: 50%;
+        }
+
+        .gone {
+            display: none;
+        }
+
+        .content div {
+            margin: auto auto;
+        }
+
+        .level,
+        .mb {
+            height: 2rem;
+            width: 50vw;
+            float: left;
+        }
+
+        svg {
+            height: 5rem;
+        }
+
+        .orange {
+            fill: var(--portal-orange);
+        }
+
+        .blue {
+            fill: var(--portal-blue);
+        }
+
+        @keyframes marquee {
+            0% {
+                left: 0;
+            }
+
+            100% {
+                left: -125%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <svg class="end" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 185 567.5" xml:space="preserve">
+            <path class="orange" d="M185,103.9v62.9l-28.1-24c-1.4-1.2-3.5-1.3-5-0.2l-67,49.1c-8.6,6.3-20.6,4.4-26.9-4.1
+           c-2.5-3.4-3.7-7.4-3.7-11.4c0-5.9,2.7-11.8,7.9-15.5l86.5-63.4c7.5-5.5,17.7-5.8,25.4-0.6L185,103.9z" />
+            <path class="orange"
+                d="M83.9,316L185,212.1v159.4l-32.1-44.4l-51.8,52.6c-13.4,13.8-36.3,10.9-45.9-5.7L2.9,281.6
+           c-5.9-10.5-2.6-23.8,7.7-30.2c3.7-2.3,7.8-3.4,11.9-3.4c7.3,0,14.4,3.5,18.8,10.1l38.2,57.5C80.4,317.1,82.6,317.3,83.9,316z" />
+            <path class="orange"
+                d="M150.2,502.2l34.8-33.7v65.1l-2.2,2.2c-9.3,9-24.1,8.8-33.1-0.5C140.7,526,140.9,511.1,150.2,502.2z" />
+        </svg>
+
+        <div class="content">
+            <div class="levelName shit marquee">
+                <div>
+                    <span class="level">No levels in queue...</span>
+                    <span class="level"></span>
+                </div>
+            </div>
+
+            <div class="madeBy">
+                <div class="mid">by: </div>
+                <div class="shit marquee">
+                    <div>
+                        <span class="mb">No levels in queue...</span>
+                        <span class="mb"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px" y="0px" viewBox="0 0 187.4 569" xml:space="preserve">
+            <circle class="blue" cx="95.9" cy="120.2" r="58.3" />
+            <path class="blue" d="M179.7,333.3l-58.6-45.5c-0.8-0.6-1.4-1.6-1.7-2.6l-18.4-72c-0.5-2.1-1.8-4-3.5-5.3l-97-74.7V332
+       c0.2-0.3,0.4-0.6,0.6-0.9l69.5-81.4c0.5-0.6,1.5-0.4,1.7,0.4L86.6,306c1,4,3.4,7.6,6.7,10.2l62.2,48.3c8.6,6.7,21,5.1,27.7-3.5
+       C189.9,352.4,188.4,340,179.7,333.3z M0.9,338c-0.1-0.2-0.3-0.4-0.3-0.6v91.3l9.9,13.6c1.1,1.5,0.9,3.5-0.3,4.9L0.5,457v69.8
+       c0.3-0.7,0.7-1.3,1.3-1.9l58.3-58.3c10.7-10.7,12.1-27.5,3.4-39.8L0.9,338z" />
+            <path class="st2" d="M0,334.2c0-0.8,0.2-1.5,0.5-2.2v5.4C0.2,336.7,0,336,0,335.2V334.2z" />
+        </svg>
+    </header>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(Document).ready(function () {
+            setInterval(function () {
+                $.ajax({
+                    type: 'GET',
+                    url: 'levels.json',
+                    data: { get_param: 'value' },
+                    dataType: 'json',
+                    cache: false,
+                    success: function (data) {
+                        if (typeof data[0] === 'undefined') {
+                            $('.level').html('No levels in queue...')
+                            $('.mb').html('No levels in queue...')
+                        } else {
+                            document.querySelector('.level').innerHTML = data[0].level;
+                            document.querySelector('.mb').innerHTML = data[0].nick;
+                        }
+                    }
+                });
+                carousel();
+            }, 2000);
+        });
+
+
+        function carousel() {
+            document.querySelectorAll('.level')[1].innerHTML = document.querySelectorAll('.level')[0].innerHTML;
+            document.querySelectorAll('.mb')[1].innerHTML = document.querySelectorAll('.mb')[0].innerHTML;
+
+            if (document.querySelector('.level').innerHTML.length > 37) {
+                document.querySelectorAll('.shit')[0].classList.add('marquee');
+                document.querySelectorAll('.level')[1].classList.remove('gone');
+            } else {
+                document.querySelectorAll('.shit')[0].classList.remove('marquee');
+                document.querySelectorAll('.level')[1].classList.add('gone');
+            }
+
+            if (document.querySelector('.mb').innerHTML.length > 17) {
+                document.querySelectorAll('.shit')[1].classList.add('marquee');
+                document.querySelectorAll('.mb')[1].classList.remove('gone');
+            } else {
+                document.querySelectorAll('.shit')[1].classList.remove('marquee');
+                document.querySelectorAll('.mb')[1].classList.add('gone');
+            }
+        }
+
+        carousel();
+
+
+    </script>
+</body>
+
 </html>

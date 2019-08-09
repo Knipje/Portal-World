@@ -26,6 +26,7 @@ class Window(tkinter.Frame):
         self.twitch = tkinter.StringVar(self, value='No levels in queue')
         self.author = tkinter.StringVar(self, value='No levels in queue')
         self.link = tkinter.StringVar(self, value='No levels in queue')
+        self.count = False
         self.update_texts()
         self.init_window()
 
@@ -65,11 +66,15 @@ class Window(tkinter.Frame):
         self.update()
     
     def next(self):
-        self.update_texts()
-        if len(self.list) != 0:
+        if (len(self.list) != 0 and str(self.list[0]['level']) == str(self.level.get()) and self.count) or len(self.list) == 1:
             self.list.pop(0)
+            self.count = False
             with open(path,'w') as outfile:
                 json.dump(self.list,outfile)
+            self.update_texts()
+        else:
+            self.update_texts()
+            self.count = True
 
     def stop(self):
         self.master.destroy()
