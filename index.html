@@ -62,7 +62,7 @@
 					}
 				});
 
-				$('.faq').click(function () {
+				$('.quest').click(function () {
 					if ($(window).width() > 1005) {
 						$('html, body').animate({
 							scrollTop: ($('#l4').first().offset().top - 50)
@@ -96,8 +96,10 @@
 			vertical-align: middle;
 		}
 
-		.about,.home,.download,.exp,.faq:hover{
+		.about:hover,.home:hover,.download:hover,.exp:hover,.quest:hover{
 			cursor: pointer;
+			background-color: rgb(45, 45, 45);
+			border-radius: 5px;
 		}
 
 		.header{
@@ -207,7 +209,7 @@
 		}
 
 		@media screen and (max-width: 1005px){
-			.about,.home,.exp,.download,.faq{
+			.about,.home,.exp,.download,.quest{
 				display: none;
 			}
 
@@ -256,13 +258,13 @@
 				<div class="exp">Tutorial</div>
 				<div class="home" id='mainname'>Portal World</div>
 				<div class="download">Download</div>
-				<div class="faq">FAQ</div>
+				<div class="quest">FAQ</div>
 			</div>
 			<div class='mobilemenu'>
 				<div class="about">About</div>
 				<div class="exp">Tutorial</div>
 				<div class="download">Download</div>
-				<div class="faq">FAQ</div>
+				<div class="quest">FAQ</div>
 			</div>
 		</div>
 
