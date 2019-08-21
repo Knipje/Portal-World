@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<title>Portal World</title>
-		<link rel="shortcut icon" type="image/jpg" href="images.jpg" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="shortcut icon" type="image/jpg" href="images.jpg"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<meta charset="UTF-8">
 		<script src="https://code.jquery.com/jquery-3.3.1.js"
 			integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous">
@@ -76,7 +76,11 @@
 			height: 40px;
 			text-align: center;
 		}
-					
+
+		.header #mainname{
+			font-size: 35pt;
+		}
+
 		.headercont{
 			vertical-align: middle;
 			margin-top: 1px;
@@ -141,12 +145,41 @@
 			border-collapse: collapse;
 			margin-left: auto;
 			margin-right: auto;
+			overflow-x: auto;
 		}
 
 		.commands td{
 			border-top: 2px solid darkgrey;
 			text-align: left;
 			padding-right: 20px;
+		}
+
+		.comcont{
+			overflow: auto;
+		}
+
+		.tutimg{
+			width: 80%;
+		}
+
+		@media screen and (max-width: 500px){
+			.header .headercont *{
+				display: none;
+			}
+
+			.header #mainname{
+				display: inline-block;
+				font-size: 25pt;
+				vertical-align: center;
+			}
+
+			.maincontainer{
+				font-size: 10pt;
+			}
+
+			.tutimg{
+				width: 99%;
+			}
 		}
 
 	</style>
@@ -156,7 +189,7 @@
 			<div class="headercont">
 				<div class="home">About</div>
 				<div class="exp">Tutorial</div>
-				<div class="home" style="font-size: 34pt;">Portal World</div>
+				<div class="home" id='mainname'>Portal World</div>
 				<div class="download">Download</div>
 				<div class="faq">FAQ</div>
 			</div>
@@ -187,8 +220,8 @@
 				<h2>Initial setup</h2>
 				<p>After downloading and installing the program in an easy to reach spot, go to its files and into the "dir" folder. In there open settings.txt</p>
 				<p>Fill in all fields correctly, keep in mind that the 'NAME' setting refers to the username of the account used to gather the oauth token while 'CHANNEL' refers to the name of the channel the bot will be active on.</p>
+				<img class='tutimg' src="https://i.imgur.com/tGJBu5e.png"/><br>
 				<p>
-					<img src="https://i.imgur.com/tGJBu5e.png"/><br>
 					In this example the bot will be active on Knipje's channel using their own account and allow every user to submit up to 3 levels at any given moment.
 				</p>
 				<p>
@@ -201,44 +234,46 @@
 				<h2>Chat commands</h2>
 				<p>
 					The proper commands for the bot are as follows:
-					<table class='commands'>
-						<tr>
-							<th>Command</th>
-							<th>Variable</th>
-							<th>Aliases</th>
-							<th>Function</th>
-						</tr>
-						<tr>
-							<td>!submit</td>
-							<td>[Steam Workshop link]</td>
-							<td>!add</td>
-							<td>Adds a level to the queue</td>
-						</tr>
-						<tr>
-							<td>!remove</td>
-							<td>[Level name]</td>
-							<td>!delete</td>
-							<td>Removes a level to the queue</td>
-						</tr>
-						<tr>
-							<td>!list</td>
-							<td>None</td>
-							<td>!queue, !q</td>
-							<td>Lists all levels</td>
-						</tr>
-						<tr>
-							<td>!current</td>
-							<td>None</td>
-							<td>!currentlevel, !nowplaying, !now, !np</td>
-							<td>Displays the current level</td>
-						</tr>
-						<tr>
-							<td>!clear</td>
-							<td>None</td>
-							<td>!reset, !empty</td>
-							<td>Resets the list of levels, <b>mod only command</b></td>
-						</tr>
-					</table>
+					<div class='comcont'>
+						<table class='commands'>
+							<tr>
+								<th>Command</th>
+								<th>Variable</th>
+								<th>Aliases</th>
+								<th>Function</th>
+							</tr>
+							<tr>
+								<td>!submit</td>
+								<td>[Steam Workshop link]</td>
+								<td>!add</td>
+								<td>Adds a level to the queue</td>
+							</tr>
+							<tr>
+								<td>!remove</td>
+								<td>[Level name]</td>
+								<td>!delete</td>
+								<td>Removes a level to the queue</td>
+							</tr>
+							<tr>
+								<td>!list</td>
+								<td>None</td>
+								<td>!queue, !q</td>
+								<td>Lists all levels</td>
+							</tr>
+							<tr>
+								<td>!current</td>
+								<td>None</td>
+								<td>!currentlevel, !nowplaying, !now, !np</td>
+								<td>Displays the current level</td>
+							</tr>
+							<tr>
+								<td>!clear</td>
+								<td>None</td>
+								<td>!reset, !empty</td>
+								<td>Resets the list of levels, <b>mod only command</b></td>
+							</tr>
+						</table>
+					</div>
 				</p>
 				<h2>Shutting down the bot</h2>
 				<p>Please remember to shut down the interface first and the console shortly thereafter in order to ensure it closes smoothly.</p>
@@ -247,42 +282,46 @@
 			<div id="l3" class="line"></div>
 			<div class="dlcontainer">
 				<h1>Downloads</h1>
-				<table class = "commands">
-					<tr>
-						<th>Version</th>
-						<th>Download link</th>
-						<th>Notes</th>
-					</tr>
-					<tr>
-						<td>0.2</td>
-						<td><a href='https://github.com/Knipje/Portal-World/releases/tag/0.2'>https://github.com/Knipje/Portal-World/releases/tag/0.2</a></td>
-						<td>Added Firefox' redesign to the bar.</td>
-					</tr>
-					<tr>
-						<td>0.1</td>
-						<td><a href='https://github.com/Knipje/Portal-World/releases/tag/0.1'>https://github.com/Knipje/Portal-World/releases/tag/0.1</a></td>
-						<td>Initial release.</td>
-					</tr>
-				</table>
+				<div class='comcont'>
+					<table class = "commands">
+						<tr>
+							<th>Version</th>
+							<th>Download link</th>
+							<th>Notes</th>
+						</tr>
+						<tr>
+							<td>0.2</td>
+							<td><a href='https://github.com/Knipje/Portal-World/releases/tag/0.2'>https://github.com/Knipje/Portal-World/releases/tag/0.2</a></td>
+							<td>Added Firefox' redesign to the bar.</td>
+						</tr>
+						<tr>
+							<td>0.1</td>
+							<td><a href='https://github.com/Knipje/Portal-World/releases/tag/0.1'>https://github.com/Knipje/Portal-World/releases/tag/0.1</a></td>
+							<td>Initial release.</td>
+						</tr>
+					</table>
+				</div>
 			</div>
 
 			<div id="l4" class="line"></div>
 			<div class="faqcont">
 				<h1>FAQ</h1>
-				<table class="commands">
-					<tr>
-						<th>Question</th>
-						<th>Answer</th>
-					</tr>
-					<tr>
-						<td>Is this a virus?</td>
-						<td>Probably not.</td>
-					</tr>
-					<tr>
-						<td>Where can I contact you?</td>
-						<td>My discord tag is @Knipje#0680, please use <a href="https://github.com/Knipje/Portal-World/issues">this link</a> for bug reports though.</td>
-					</tr>
-				</table>				
+				<div class='comcont'>
+					<table class="commands">
+						<tr>
+							<th>Question</th>
+							<th>Answer</th>
+						</tr>
+						<tr>
+							<td>Is this a virus?</td>
+							<td>Probably not.</td>
+						</tr>
+						<tr>
+							<td>Where can I contact you?</td>
+							<td>My discord tag is @Knipje#0680, please use <a href="https://github.com/Knipje/Portal-World/issues">this link</a> for bug reports though.</td>
+						</tr>
+					</table>				
+				</div>
 			</div>
 		</div>
 	</body>
