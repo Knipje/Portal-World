@@ -16,7 +16,7 @@
 				$('.home').click(function () {
 					if ($(window).width() > 1005){
 						$('html, body').animate({
-							scrollTop: ($('#l1').first().offset().top)
+							scrollTop: ($('body').first().offset().top - 50)
 						}, 500);
 					}else{
 						$('.mobilemenu').toggle();
@@ -26,12 +26,12 @@
 				$('.exp').click(function () {
 					if ($(window).width() > 1005){
 						$('html, body').animate({
-							scrollTop: ($('#l2').first().offset().top)
+							scrollTop: ($('#l2').first().offset().top - 50)
 						}, 500);
 					}else{
 						$('.mobilemenu').toggle();
 						$('html, body').animate({
-							scrollTop: ($('#l2').first().offset().top)
+							scrollTop: ($('#l2').first().offset().top - 50)
 						}, 500);
 					}
 				});
@@ -39,12 +39,12 @@
 				$('.about').click(function () {
 					if ($(window).width() > 1005) {
 						$('html, body').animate({
-							scrollTop: ($('#l1').first().offset().top)
+							scrollTop: ($('#l1').first().offset().top - 50)
 						}, 500);
 					} else {
 						$('.mobilemenu').toggle();
 						$('html, body').animate({
-							scrollTop: ($('#l1').first().offset().top)
+							scrollTop: ($('#l1').first().offset().top - 50)
 						}, 500);
 					}
 				});
@@ -52,12 +52,12 @@
 				$('.download').click(function () {
 					if ($(window).width() > 1005) {
 						$('html, body').animate({
-							scrollTop: ($('#l3').first().offset().top)
+							scrollTop: ($('#l3').first().offset().top - 50)
 						}, 500);
 					} else {
 						$('.mobilemenu').toggle();
 						$('html, body').animate({
-							scrollTop: ($('#l3').first().offset().top)
+							scrollTop: ($('#l3').first().offset().top - 50)
 						}, 500);
 					}
 				});
@@ -65,12 +65,12 @@
 				$('.faq').click(function () {
 					if ($(window).width() > 1005) {
 						$('html, body').animate({
-							scrollTop: ($('#l4').first().offset().top)
+							scrollTop: ($('#l4').first().offset().top - 50)
 						}, 500);
 					} else {
 						$('.mobilemenu').toggle();
 						$('html, body').animate({
-							scrollTop: ($('#l4').first().offset().top)
+							scrollTop: ($('#l4').first().offset().top - 50)
 						}, 500);
 					}
 				});
@@ -175,8 +175,8 @@
 			background-color: rgb(37, 37, 37);
 			position: absolute;
 			top: 50px;
+			left: 0;
 			width: 100%;
-			right: -7%;
 			-webkit-box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.5);
 			-moz-box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.5);
 			box-shadow: 0px 1px 0px 0px rgba(0,0,0,0.5);	
@@ -200,9 +200,19 @@
 			width: 80%;
 		}
 
+		@media screen and (min-width: 1006px){
+			.mobilemenu{
+				display: none !important;
+			}
+		}
+
 		@media screen and (max-width: 1005px){
 			.about,.home,.exp,.download,.faq{
 				display: none;
+			}
+
+			.header *{
+				padding: 0;
 			}
 
 			.header #mainname{
@@ -343,7 +353,7 @@
 
 			<div id="l3" class="line"></div>
 			<div class="dlcontainer">
-				<h1>Downloads</h1>
+				<h1>Download</h1>
 				<div class='comcont'>
 					<table class = "commands">
 						<tr>
