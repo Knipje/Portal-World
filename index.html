@@ -18,7 +18,11 @@
 						$('html, body').animate({
 							scrollTop: ($('body').first().offset().top - 50)
 						}, 500);
-					}else{
+					}
+				});
+
+				$('.headercont').click(function(){
+					if ($(window).width() < 1006){
 						$('.mobilemenu').toggle();
 					}
 				});
@@ -125,6 +129,8 @@
 		.headercont{
 			vertical-align: middle;
 			margin-top: 1px;
+			height: 53px;
+			width: 100%;
 			margin-left:auto;
 			margin-right:auto;
 			display:inline-block;
