@@ -10,6 +10,7 @@
 			integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous">
 		</script>
 		<script>
+
 			$(document).ready(function () {
 
 
@@ -78,6 +79,12 @@
 						}, 500);
 					}
 				});
+											
+				$('.repimg').click(function(){
+					$('#repImg1').toggle();
+					$('#repImg2').toggle();
+				});
+
 			});
 		</script>
 		<style>
@@ -103,6 +110,11 @@
 			cursor: pointer;
 			background-color: rgb(45, 45, 45);
 			border-radius: 5px;
+		}
+
+		#repImg1:hover,#repImg2:hover{
+			cursor: pointer;
+			font-weight: bold;
 		}
 
 		.about,.home,.download,.exp,.quest{
@@ -304,7 +316,12 @@
 				<h2>Initial setup</h2>
 				<p>After downloading and installing the program in an easy to reach spot, go to its files and into the "dir" folder. In there open settings.txt</p>
 				<p>Fill in all fields correctly, keep in mind that the 'NAME' setting refers to the username of the account used to gather the oauth token while 'CHANNEL' refers to the name of the channel the bot will be active on.</p>
-				<img class='tutimg' src="imgs/tut1.png"/><br>
+				<div class="line" style="margin-top:-20px;"></div>
+				<div class="repimg">
+					<p id="repImg1">Click here to display image</p>
+					<p id="repImg2" style="display: none;"><img class='tutimg' src="imgs/tut1.png"/></p>
+				</div>
+				<div class="line" style="margin-top:-20px;"></div>
 				<p>
 					In this example the bot will be active on Knipje's channel using their own account and allow every user to submit up to 3 levels at any given moment.
 				</p>
