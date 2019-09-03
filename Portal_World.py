@@ -26,8 +26,8 @@ class Window(tkinter.Frame):
         self.twitch = tkinter.StringVar(self, value='No levels in queue')
         self.author = tkinter.StringVar(self, value='No levels in queue')
         self.link = tkinter.StringVar(self, value='No levels in queue')
-        self.count = False
-        self.update_texts()
+        with open(path,'r') as infile:
+            self.update_texts(json.load(infile))
         self.init_window()
 
     def init_window(self):
@@ -110,9 +110,7 @@ class Window(tkinter.Frame):
         with open(path, 'w') as outfile:
             json.dump(levelList, outfile)
 
-    def update_texts(self):
-        with open(path, 'r') as infile:
-            level = json.load(infile)
+    def update_texts(self,level):
         if len(level) == 0:
             self.level.set('No levels in queue')
             self.twitch.set('No levels in queue')
@@ -123,7 +121,6 @@ class Window(tkinter.Frame):
             self.twitch.set(level[0]['twitch'])
             self.author.set(level[0]['nick'])
             self.link.set(level[0]['link'])
-        self.list = level
 
     def clear_list(self):
         with open(path, 'w') as outfile:
@@ -135,15 +132,16 @@ class Window(tkinter.Frame):
         self.update()
 
     def next(self):
-        if (len(self.list) != 0 and str(self.list[0]['level']) == str(self.level.get()) and self.count) or len(self.list) == 1:
-            self.list.pop(0)
+        with open(path,'r') as infile:
+            levelList = json.load(infile)
+        if (len(levelList) != 0 and str(levelList[0]['level']) == str(self.level.get())) or len(levelList) == 1:
+            levelList.pop(0)
             self.count = False
             with open(path, 'w') as outfile:
-                json.dump(self.list, outfile)
-            self.update_texts()
+                json.dump(levelList, outfile)
+            self.update_texts(levelList)
         else:
-            self.update_texts()
-            self.count = True
+            self.update_texts(levelList)
 
     def stop(self):
         self.master.destroy()
