@@ -248,11 +248,14 @@ class Bot(commands.Bot):
             for level in levels:
                 if level['level'].lower() == mat.group(1).lower():
                     if level['author'] == ctx.author.id:
-                        levels.pop(i)
-                        with open(path,'w') as outfile:
-                            json.dump(levels, outfile)
+                        if i == 0:
+                            await ctx.send('Cannot remove level due to it currently being played.')
+                        else:
+                            levels.pop(i)
+                            with open(path,'w') as outfile:
+                                json.dump(levels, outfile)
 
-                        await ctx.send(f'Succesfully removed {mat.group(1)} from list!')
+                            await ctx.send(f'Succesfully removed {mat.group(1)} from list!')
                     else:
                         await ctx.send('Cannot remove level because {0} submitted it, not {1}.'.format(level['nick'], ctx.author.display_name))
                     break
@@ -289,7 +292,6 @@ class Bot(commands.Bot):
             await ctx.send('The current level is "{0}" by "{1}" submitted by "{2}" link {3}.'.format(levels[0]['level'],levels[0]['nick'],levels[0]['twitch'],levels[0]['link']))
         else:
             await ctx.send('The queue is currently empty.')
-
 
 if len(argv) < 2:
     path = os.path.dirname(os.path.abspath(__file__)) + "/dir/levels.json"
