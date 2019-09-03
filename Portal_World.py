@@ -1,6 +1,7 @@
 try:
     import http.server
     from twitchio.ext import commands
+    from twitchio.errors import AuthenticationError
     import json
     from re import search,findall,IGNORECASE,MULTILINE 
     from sys import argv
@@ -162,8 +163,11 @@ class Bot(commands.Bot):
                 exit()
         self.move = False
         self.user_count = mat[3]
-        super().__init__(irc_token=mat[0],prefix='!', nick=mat[1], initial_channels=[mat[2]])
-    
+        try:
+            super().__init__(irc_token=mat[0],prefix='!', nick=mat[1], initial_channels=[mat[2]])
+        except AuthenticationError:
+            print('settings.txt not filled in correctly. Please close this window and check you settings.')
+
     def close(self):
         os.system('exit')
 
@@ -175,7 +179,7 @@ class Bot(commands.Bot):
         try:
             if message.author == self.nick:
                 return
-                
+
             await self.handle_commands(message)
         except Exception as e:
             message.channel.send("Uncaught error: {}".format(e))
