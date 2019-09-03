@@ -19,9 +19,9 @@ except ImportError as e:
 
 class Window(tkinter.Frame):
 
-    def __init__(self,master=None):
+    def __init__(self, master=None):
         tkinter.Frame.__init__(self, master)
-        self.master=master
+        self.master = master
         self.level = tkinter.StringVar(self, value='No levels in queue')
         self.twitch = tkinter.StringVar(self, value='No levels in queue')
         self.author = tkinter.StringVar(self, value='No levels in queue')
@@ -33,20 +33,85 @@ class Window(tkinter.Frame):
     def init_window(self):
         self.master.title("Portal World")
         self.pack(fill=tkinter.BOTH, expand=1)
-        tkinter.Label(self, text='Level name:').pack()
-        tkinter.Label(self, textvariable=self.level, wraplength=390).pack()
-        tkinter.Label(self, text='Level creator:').pack()
-        tkinter.Label(self, textvariable=self.author, wraplength=390).pack()
-        tkinter.Label(self, text='Level submitter:').pack()
-        tkinter.Label(self, textvariable=self.twitch, wraplength=390).pack()
-        tkinter.Label(self, text='Level link:').pack()
-        tkinter.Label(self, textvariable=self.link, wraplength=390).pack()
-        tkinter.Button(self,text='Copy link',command=self.get_link).pack()
-        tkinter.Button(self,text='Next level',command=self.next).pack()
-        tkinter.Button(self,text='Quit',command=self.stop).pack()
+        tkinter.Label(self, text='Level name:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, textvariable=self.level, wraplength=390).pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, text='Level creator:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, textvariable=self.author, wraplength=390).pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, text='Level submitter:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, textvariable=self.twitch, wraplength=390).pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, text='Level link:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Label(self, textvariable=self.link, wraplength=390).pack(
+            side="top", fill="both", pady=5, padx=2)
+        tkinter.Button(self, text='Copy link', command=self.get_link).pack(
+            side="top", fill="both", pady=5, padx=50)
+        tkinter.Button(self, text='Next level', command=self.next).pack(
+            side="top", fill="both", pady=5, padx=50)
+        tkinter.Button(self, text="Input level manually", command=self.new_window).pack(
+            side="top", fill="both", pady=5, padx=50)
+        tkinter.Button(self, text="Clear list", command=self.clear_list).pack(
+            side="top", fill="both", pady=5, padx=50)
+
+    def new_window(self):
+        self.t = tkinter.Toplevel(self)
+        self.t.wm_title("Input level info")
+        self.t.iconbitmap(favicon)
+        tkinter.Label(self.t, text='Level name:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        self.new_level = tkinter.StringVar(None)
+        tkinter.Entry(self.t, textvariable=self.new_level).pack()
+        tkinter.Label(self.t, text='Level creator:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        self.new_creator = tkinter.StringVar(None)
+        tkinter.Entry(self.t, textvariable=self.new_creator).pack()
+        tkinter.Label(self.t, text='Level submitter:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        self.new_submitter = tkinter.StringVar(None)
+        tkinter.Entry(self.t, textvariable=self.new_submitter).pack()
+        tkinter.Label(self.t, text='Level link:').pack(
+            side="top", fill="both", pady=5, padx=2)
+        self.new_link = tkinter.StringVar(None)
+        tkinter.Entry(self.t, textvariable=self.new_link).pack()
+        tkinter.Button(self.t, text="Submit as next level", command=lambda: self.submit_new(
+            True)).pack(side="top", fill="both", pady=5, padx=50)
+        tkinter.Button(self.t, text="Submit to queue", command=lambda: self.submit_new(
+            False)).pack(side="top", fill="both", pady=5, padx=50)
+        tkinter.Button(self.t, text="Cancel", command=lambda: self.t.destroy()).pack(
+            side="top", fill="both", pady=5, padx=50)
+
+    def submit_new(self, top):
+        self.t.destroy()
+        level = self.new_level.get()
+        creator = self.new_creator.get()
+        submitter = self.new_submitter.get()
+        link = self.new_link.get()
+        if not level:
+            level = "None"
+        if not creator:
+            creator = "None"
+        if not submitter:
+            submitter = "None"
+        if not link:
+            link = "None"
+        with open(path, 'r') as infile:
+            levelList = json.load(infile)
+        out = {'level': level, 'twitch': submitter,
+               'nick': creator, 'link': link}
+        if len(levelList) > 0 and top:
+            levelList.insert(1, out)
+        else:
+            levelList.append(out)
+        with open(path, 'w') as outfile:
+            json.dump(levelList, outfile)
 
     def update_texts(self):
-        with open(path,'r') as infile:
+        with open(path, 'r') as infile:
             level = json.load(infile)
         if len(level) == 0:
             self.level.set('No levels in queue')
@@ -59,18 +124,22 @@ class Window(tkinter.Frame):
             self.author.set(level[0]['nick'])
             self.link.set(level[0]['link'])
         self.list = level
-        
+
+    def clear_list(self):
+        with open(path, 'w') as outfile:
+            outfile.write('[]')
+
     def get_link(self):
         self.clipboard_clear()
         self.clipboard_append(self.link.get())
         self.update()
-    
+
     def next(self):
         if (len(self.list) != 0 and str(self.list[0]['level']) == str(self.level.get()) and self.count) or len(self.list) == 1:
             self.list.pop(0)
             self.count = False
-            with open(path,'w') as outfile:
-                json.dump(self.list,outfile)
+            with open(path, 'w') as outfile:
+                json.dump(self.list, outfile)
             self.update_texts()
         else:
             self.update_texts()
@@ -78,6 +147,8 @@ class Window(tkinter.Frame):
 
     def stop(self):
         self.master.destroy()
+
+
 
 
 class Bot(commands.Bot):
@@ -208,8 +279,6 @@ class Bot(commands.Bot):
         if ctx.author.is_mod:
             with open(path,'w') as outfile:
                 outfile.write('[]')
-            with open(path2,'w') as outfile:
-                outfile.write('')
             await ctx.send('Succesfully cleared queue!')
 
     @commands.command(name='current',aliases=['currentlevel','np','nowplaying','now'])
@@ -228,30 +297,36 @@ else:
     path = argv[1]
 
 if len(argv) < 3:
-    path2 = os.path.dirname(os.path.abspath(__file__)) + "/dir/output.txt"
-else:
-    path2 = argv[2]
-
-if len(argv) < 4:
     path3 = os.path.dirname(os.path.abspath(__file__)) + '/dir'
 else:
-    path3 = argv[3]
+    path3 = argv[2]
 
-bot = Bot()
+favicon = os.path.dirname(os.path.abspath(__file__)) + '/imgs/favicon.ico'
+
+with open(path3 + '/def.txt', 'r') as infile:
+    default = infile.read()
+
+with open(path3 + '/settings.txt', 'r') as infile:
+    settings = infile.read()
+    mat = findall(r'"(.+?)"', settings)
+    if len(mat) != 4 or default == settings:
+        input('Error, please fill settings.txt completely in first. ')
+        exit()
 
 class run_bot(threading.Thread):
     def __init__(self, name):
         threading.Thread.__init__(self)
         self.name = name
+        self.bot = Bot()
 
     def run(self):
         try:
-            bot.run()
+            self.bot.run()
         finally:
             exit()
 
     def stop(self):
-        bot.close()
+        self.bot.close()
 
 class run_serv(threading.Thread):
     def __init__(self, name):
@@ -285,8 +360,11 @@ class run_serv(threading.Thread):
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
 
 def run_ui():
+
     root = tkinter.Tk()
-    root.geometry("400x300")
+    root.iconbitmap(favicon)
+    root.geometry("400x400")
+    root.resizable(False, True)
     app = Window(root)
     root.mainloop()
     
