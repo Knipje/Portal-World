@@ -172,7 +172,13 @@ class Bot(commands.Bot):
         print(f'Ready | {self.nick}')
 
     async def event_message(self, message):
-        await self.handle_commands(message)
+        try:
+            if message.author == self.nick:
+                return
+                
+            await self.handle_commands(message)
+        except Exception as e:
+            message.channel.send("Uncaught error: {}".format(e))
 
     async def event_command_error(self, ctx, error):
         if isinstance(error, commands.errors.CommandNotFound):
