@@ -1,0 +1,14 @@
+http.server
+twitchio
+json
+re
+sys
+os
+threading
+time
+requests
+ctypes
+steam
+socketserver
+subprocess
+tkinter
