@@ -27,6 +27,7 @@ class Window(tkinter.Frame):
         self.twitch = tkinter.StringVar(self, value='No levels in queue')
         self.author = tkinter.StringVar(self, value='No levels in queue')
         self.link = tkinter.StringVar(self, value='No levels in queue')
+        self.no_level = True
         with open(path,'r') as infile:
             self.update_texts(json.load(infile))
         self.init_window()
@@ -117,15 +118,18 @@ class Window(tkinter.Frame):
             self.twitch.set('No levels in queue')
             self.author.set('No levels in queue')
             self.link.set('No levels in queue')
+            self.no_level = False
         else:
             self.level.set(level[0]['level'])
             self.twitch.set(level[0]['twitch'])
             self.author.set(level[0]['nick'])
             self.link.set(level[0]['link'])
+            self.no_level = True
 
     def clear_list(self):
         with open(path, 'w') as outfile:
             outfile.write('[]')
+        self.update_texts([])
 
     def get_link(self):
         self.clipboard_clear()
@@ -135,19 +139,16 @@ class Window(tkinter.Frame):
     def next(self):
         with open(path,'r') as infile:
             levelList = json.load(infile)
-        if (len(levelList) != 0 and str(levelList[0]['level']) == str(self.level.get())) or len(levelList) == 1:
+        if len(levelList) >= 1 and self.no_level:
+            # and str(levelList[0]['level']) == str(self.level.get())
             levelList.pop(0)
             self.count = False
             with open(path, 'w') as outfile:
                 json.dump(levelList, outfile)
-            self.update_texts(levelList)
-        else:
-            self.update_texts(levelList)
+        self.update_texts(levelList)
 
     def stop(self):
         self.master.destroy()
-
-
 
 
 class Bot(commands.Bot):
@@ -355,8 +356,6 @@ class run_serv(threading.Thread):
             exit()
 
     def get_id(self):
-        if hasattr(self, '_thread_id'):
-            return self._thread_id
         # returns id of the respective thread
         for id, thread in threading._active.items():
             if thread is self:
