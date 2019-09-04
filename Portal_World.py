@@ -159,13 +159,14 @@ class Bot(commands.Bot):
         with open(path3 + '/settings.txt', 'r') as infile:
             settings = infile.read()
             mat = findall(r'"(.+?)"', settings)
-            if len(mat) != 4 or default == settings:
+            if len(mat) < 5 or default == settings:
                 print('Error, please fill settings.txt completely in first.')
                 exit()
         self.move = False
         self.user_count = mat[3]
+        self.settings = mat
         try:
-            super().__init__(irc_token=mat[0],prefix='!', nick=mat[1], initial_channels=[mat[2]])
+            super().__init__(irc_token=mat[0],prefix=mat[4], nick=mat[1], initial_channels=[mat[2]])
         except AuthenticationError:
             print('settings.txt not filled in correctly. Please close this window and check you settings.')
 
@@ -182,6 +183,9 @@ class Bot(commands.Bot):
                 return
 
             await self.handle_commands(message)
+
+            await self.help_command(message)
+            
         except Exception as e:
             message.channel.send("Uncaught error: {}".format(e))
 
@@ -189,6 +193,11 @@ class Bot(commands.Bot):
         if isinstance(error, commands.errors.CommandNotFound):
             return
         raise error
+
+    async def help_command(self,ctx):
+        if len(self.settings) >= 5:
+            if ctx.content.startswith(str(self.settings[4]) + str(self.settings[5])):
+                await ctx.channel.send('{0}add[submit] (level url), {0}remove[/delete] (level name), {0}list[queue,q], {0}current[np]'.format(self.settings[4]))
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
@@ -302,6 +311,7 @@ class Bot(commands.Bot):
         else:
             await ctx.send('The queue is currently empty.')
 
+
 if len(argv) < 2:
     path = os.path.dirname(os.path.abspath(__file__)) + "/dir/levels.json"
 else:
@@ -320,7 +330,7 @@ with open(path3 + '/def.txt', 'r') as infile:
 with open(path3 + '/settings.txt', 'r') as infile:
     settings = infile.read()
     mat = findall(r'"(.+?)"', settings)
-    if len(mat) != 4 or default == settings:
+    if len(mat) < 5 or default == settings:
         input('Error, please fill settings.txt completely in first. ')
         exit()
 
