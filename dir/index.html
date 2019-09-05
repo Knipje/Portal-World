@@ -157,7 +157,7 @@
         <div class="content">
             <div class="levelName shit marquee">
                 <div>
-                    <span class="level">Use !add to add your level!</span>
+                    <span class="level">Use !add to add your level</span>
                     <span class="level"></span>
                 </div>
             </div>
@@ -166,7 +166,7 @@
                 <div class="mid">by: </div>
                 <div class="shit marquee">
                     <div>
-                        <span class="mb">Use !add to add your level!</span>
+                        <span class="mb">Use !add to add your level</span>
                         <span class="mb"></span>
                     </div>
                 </div>
@@ -196,8 +196,8 @@
                     cache: false,
                     success: function (data) {
                         if (typeof data[0] === 'undefined') {
-                            $('.level').html('No levels in queue...')
-                            $('.mb').html('No levels in queue...')
+                            $('.level').html('Use !add to add your level')
+                            $('.mb').html('Use !add to add your level')
                         } else {
                             document.querySelector('.level').innerHTML = data[0].level;
                             document.querySelector('.mb').innerHTML = data[0].nick;

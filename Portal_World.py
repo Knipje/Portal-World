@@ -16,11 +16,21 @@ try:
     import subprocess
     import tkinter
 except ImportError as e:
-    print(e)
+    input(str(e))
+    exit()
 
 class Window(tkinter.Frame):
 
     def __init__(self, master=None):
+        with open(path3 + '/settings.txt', 'r') as infile:
+            channel_name = infile.readlines()[2]
+            mat = findall(r'"(.+?)"', channel_name)
+            if len(mat) == 1:
+                self.channel_name = mat[0]
+            else:
+                self.channel_name = None
+
+
         tkinter.Frame.__init__(self, master)
         self.master = master
         self.level = tkinter.StringVar(self, value='No levels in queue')
@@ -75,6 +85,8 @@ class Window(tkinter.Frame):
         tkinter.Label(self.t, text='Level submitter:').pack(
             side="top", fill="both", pady=5, padx=2)
         self.new_submitter = tkinter.StringVar(None)
+        if self.channel_name:
+            self.new_submitter.set(self.channel_name)
         tkinter.Entry(self.t, textvariable=self.new_submitter).pack()
         tkinter.Label(self.t, text='Level link:').pack(
             side="top", fill="both", pady=5, padx=2)
