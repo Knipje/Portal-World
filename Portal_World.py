@@ -1,7 +1,7 @@
 try:
     import http.server
     from twitchio.ext import commands
-    from twitchio.errors import AuthenticationError
+    from twitchio.errors import AuthenticationError,EchoMessageWarning
     import json
     from re import search,findall,IGNORECASE,MULTILINE 
     from sys import argv
@@ -185,17 +185,19 @@ class Bot(commands.Bot):
             await self.handle_commands(message)
 
             await self.help_command(message)
-            
+
         except Exception as e:
-            message.channel.send("Uncaught error: {}".format(e))
+            if isinstance(e,commands.errors.CommandNotFound) or isinstance(e,EchoMessageWarning):
+                return
+            await message.channel.send("Uncaught error: {}".format(e))
 
     async def event_command_error(self, ctx, error):
-        if isinstance(error, commands.errors.CommandNotFound):
+        if isinstance(error, commands.errors.CommandNotFound) or isinstance(error,EchoMessageWarning):
             return
         raise error
 
     async def help_command(self,ctx):
-        if len(self.settings) >= 5:
+        if len(self.settings) >= 6:
             if ctx.content.startswith(str(self.settings[4]) + str(self.settings[5])):
                 await ctx.channel.send('{0}add[submit] (level url), {0}remove[/delete] (level name), {0}list[queue,q], {0}current[np]'.format(self.settings[4]))
 
