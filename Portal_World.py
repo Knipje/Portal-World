@@ -213,8 +213,8 @@ class Bot(commands.Bot):
             while True:
                 try:
                     req = requests.get(levelLink)
-                except Exception:
-                    pass
+                except Exception as e:
+                    print("Failed to get level link, retrying... {}".format(e))
                 else:
                     break
             if req.ok:
