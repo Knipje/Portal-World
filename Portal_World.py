@@ -248,7 +248,7 @@ class Bot(commands.Bot):
                             if len(data) > 2:
                                 if level['author'] == ctx.author.id:
                                     i += 1
-                            if level['level'].lower() == levelName.lower():
+                            if level['link'].lower() == levelLink.lower():
                                 await ctx.send('Unable to add level due to {0} already being in the queue!'.format(levelName))
                                 return
                     
@@ -289,7 +289,7 @@ class Bot(commands.Bot):
 
                             await ctx.send(f'Succesfully removed {mat.group(1)} from list!')
                     else:
-                        await ctx.send('Cannot remove level because {0} submitted it, not {1}.'.format(level['nick'], ctx.author.display_name))
+                        await ctx.send('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name))
                     break
                 i += 1
         else:
