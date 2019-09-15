@@ -399,7 +399,7 @@ def run_ui():
     root.minsize(400,200)
     root.resizable(False, True)
     app = Window(root)
-    root.mainloop()
+    app.mainloop()
     
 if __name__ == '__main__':
 
