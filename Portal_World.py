@@ -189,6 +189,19 @@ class Bot(commands.Bot):
     async def event_ready(self):
         print(f'Ready | {self.nick}')
 
+    async def send_message(self,message,channel):
+        if len(message) == 0 or message == None:
+            return
+        if len(message) < 500:
+            await channel.send(message)
+            return
+
+        while len(message) >= 500:
+            await channel.send(message[:499])
+            message = message[499:]
+        if len(message) != 0:
+            await channel.send(message)
+
     async def event_message(self, message):
         try:
             if message.author == self.nick:
@@ -211,7 +224,7 @@ class Bot(commands.Bot):
     async def help_command(self,ctx):
         if len(self.settings) >= 6:
             if ctx.content.startswith(str(self.settings[4]) + str(self.settings[5])):
-                await ctx.channel.send('{0}add[submit] (level url), {0}remove[/delete] (level name), {0}list[queue,q], {0}current[np]'.format(self.settings[4]))
+                await self.send_message('{0}add[submit] (level url), {0}remove[/delete] (level name), {0}list[queue,q], {0}current[np]'.format(self.settings[4]),ctx)
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
@@ -249,18 +262,18 @@ class Bot(commands.Bot):
                                 if level['author'] == ctx.author.id:
                                     i += 1
                             if level['link'].lower() == levelLink.lower():
-                                await ctx.send('Unable to add level due to {0} already being in the queue!'.format(levelName))
+                                await self.send_message('Unable to add level due to {0} already being in the queue!'.format(levelName),ctx)
                                 return
                     
                         if len(data) > int(self.user_count) - 1:
                             if i >= int(self.user_count):
-                                await ctx.send('Unable to add level due to {0} already having {1} levels in the queue!'.format(ctx.author.display_name,self.user_count))
+                                await self.send_message('Unable to add level due to {0} already having {1} levels in the queue!'.format(ctx.author.display_name,self.user_count),ctx)
                                 return
 
                         with open(path,'w') as outfile:
                             data.append({'link':levelLink,'level':levelName,'author':ctx.author.id,'nick':authorName,'twitch':ctx.author.display_name})
                             json.dump(data,outfile)
-                        await ctx.send(f'Succesfully added {levelName} to the queue!')
+                        await self.send_message(f'Succesfully added {levelName} to the queue!',ctx)
                     else:
                         await ctx.send('Error with steam api')
                 else:
@@ -287,9 +300,9 @@ class Bot(commands.Bot):
                             with open(path,'w') as outfile:
                                 json.dump(levels, outfile)
 
-                            await ctx.send(f'Succesfully removed {mat.group(1)} from list!')
+                            await self.send_message(f'Succesfully removed {mat.group(1)} from list!',ctx)
                     else:
-                        await ctx.send('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name))
+                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name),ctx)
                     break
                 i += 1
         else:
@@ -305,7 +318,7 @@ class Bot(commands.Bot):
             for level in levels:
                 out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['level'],level['nick'],level['twitch'],i)
                 i += 1
-            await ctx.send(out)
+            await self.send_message(out,ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
@@ -321,7 +334,7 @@ class Bot(commands.Bot):
         with open(path,'r') as infile:
             levels = json.load(infile)
         if len(levels) > 0:
-            await ctx.send('The current level is "{0}" by "{1}" submitted by "{2}" link {3}.'.format(levels[0]['level'],levels[0]['nick'],levels[0]['twitch'],levels[0]['link']))
+            await self.send_message('The current level is "{0}" by "{1}" submitted by "{2}" link {3}.'.format(levels[0]['level'],levels[0]['nick'],levels[0]['twitch'],levels[0]['link']),ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
