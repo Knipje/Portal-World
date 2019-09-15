@@ -44,7 +44,7 @@ class Window(tkinter.Frame):
 
     def init_window(self):
         self.master.title("Portal World")
-        self.pack(fill=tkinter.BOTH, expand=1)
+        self.pack(expand=1)
         tkinter.Label(self, text='Level name:').pack(
             side="top", fill="both", pady=5, padx=2)
         tkinter.Label(self, textvariable=self.level, wraplength=390).pack(
@@ -62,13 +62,13 @@ class Window(tkinter.Frame):
         tkinter.Label(self, textvariable=self.link, wraplength=390).pack(
             side="top", fill="both", pady=5, padx=2)
         tkinter.Button(self, text='Copy link', command=self.get_link).pack(
-            side="top", fill="both", pady=5, padx=50)
+            side="top", fill="both", pady=5, padx=5)
         tkinter.Button(self, text='Next level', command=self.next).pack(
-            side="top", fill="both", pady=5, padx=50)
+            side="top", fill="both", pady=5, padx=5)
         tkinter.Button(self, text="Input level manually", command=self.new_window).pack(
-            side="top", fill="both", pady=5, padx=50)
+            side="top", fill="both", pady=5, padx=5)
         tkinter.Button(self, text="Clear list", command=self.clear_list).pack(
-            side="top", fill="both", pady=5, padx=50)
+            side="top", fill="both", pady=5, padx=5)
 
     def new_window(self):
         self.t = tkinter.Toplevel(self)
@@ -279,7 +279,7 @@ class Bot(commands.Bot):
             i = 0
             for level in levels:
                 if level['level'].lower() == mat.group(1).lower():
-                    if level['author'] == ctx.author.id:
+                    if level['author'] == ctx.author.id or ctx.author.is_mod:
                         if i == 0:
                             await ctx.send('Cannot remove level due to it currently being played.')
                         else:
@@ -396,7 +396,7 @@ def run_ui():
 
     root = tkinter.Tk()
     root.iconbitmap(favicon)
-    root.geometry("400x400")
+    root.minsize(400,200)
     root.resizable(False, True)
     app = Window(root)
     root.mainloop()
