@@ -46,29 +46,30 @@ class Window(tkinter.Frame):
         self.master.title("Portal World")
         self.pack(expand=1)
         tkinter.Label(self, text='Level name:').pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, textvariable=self.level, wraplength=390).pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, text='Level creator:').pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, textvariable=self.author, wraplength=390).pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, text='Level submitter:').pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, textvariable=self.twitch, wraplength=390).pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, text='Level link:').pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
         tkinter.Label(self, textvariable=self.link, wraplength=390).pack(
-            side="top", fill="both", pady=5, padx=2)
+            side="top", fill="none", pady=5, padx=2)
+
         tkinter.Button(self, text='Copy link', command=self.get_link).pack(
-            side="top", fill="both", pady=5, padx=5)
+            side="top", fill="none", pady=5, padx=5)
         tkinter.Button(self, text='Next level', command=self.next).pack(
-            side="top", fill="both", pady=5, padx=5)
+            side="top", fill="none", pady=5, padx=5)
         tkinter.Button(self, text="Input level manually", command=self.new_window).pack(
-            side="top", fill="both", pady=5, padx=5)
+            side="top", fill="none", pady=5, padx=5)
         tkinter.Button(self, text="Clear list", command=self.clear_list).pack(
-            side="top", fill="both", pady=5, padx=5)
+            side="top", fill="none", pady=5, padx=5)
 
     def new_window(self):
         self.t = tkinter.Toplevel(self)
@@ -115,8 +116,8 @@ class Window(tkinter.Frame):
             link = "None"
         with open(path, 'r') as infile:
             levelList = json.load(infile)
-        out = {'level': level, 'twitch': submitter,
-               'nick': creator, 'link': link}
+        out = {'levelName': level, 'submitterName': submitter,
+               'levelMakerName': creator, 'link': link}
         if len(levelList) > 0 and top:
             levelList.insert(1, out)
         else:
@@ -132,9 +133,9 @@ class Window(tkinter.Frame):
             self.link.set('No levels in queue')
             self.no_level = False
         else:
-            self.level.set(level[0]['level'])
-            self.twitch.set(level[0]['twitch'])
-            self.author.set(level[0]['nick'])
+            self.level.set(level[0]['levelName'])
+            self.twitch.set(level[0]['submitterName'])
+            self.author.set(level[0]['levelMakerName'])
             self.link.set(level[0]['link'])
             self.no_level = True
 
@@ -152,7 +153,7 @@ class Window(tkinter.Frame):
         with open(path,'r') as infile:
             levelList = json.load(infile)
         if len(levelList) >= 1 and self.no_level:
-            # and str(levelList[0]['level']) == str(self.level.get())
+            # and str(levelList[0]['levelName']) == str(self.level.get())
             levelList.pop(0)
             self.count = False
             with open(path, 'w') as outfile:
@@ -259,7 +260,7 @@ class Bot(commands.Bot):
                         i = 0
                         for level in data:
                             if len(data) > 2:
-                                if level['author'] == ctx.author.id:
+                                if level['twitchID'] == ctx.author.id:
                                     i += 1
                             if level['link'].lower() == levelLink.lower():
                                 await self.send_message('Unable to add level due to {0} already being in the queue!'.format(levelName),ctx)
@@ -271,7 +272,7 @@ class Bot(commands.Bot):
                                 return
 
                         with open(path,'w') as outfile:
-                            data.append({'link':levelLink,'level':levelName,'author':ctx.author.id,'nick':authorName,'twitch':ctx.author.display_name})
+                            data.append({'link':levelLink,'levelName':levelName,'twitchID':ctx.author.id,'levelMakerName':authorName,'submitterName':ctx.author.display_name})
                             json.dump(data,outfile)
                         await self.send_message(f'Succesfully added {levelName} to the queue!',ctx)
                     else:
@@ -296,18 +297,18 @@ class Bot(commands.Bot):
             i = 0
             for level in levels:
                 if level['link'].lower() == mat.group(1).lower():
-                    if level['author'] == ctx.author.id or ctx.author.is_mod:
+                    if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
                         if i == 0:
                             await ctx.send('Cannot remove level due to it currently being played.')
                         else:
-                            lname = level['level']
+                            lname = level['levelName']
                             levels.pop(i)
                             with open(path,'w') as outfile:
                                 json.dump(levels, outfile)
 
                             await self.send_message(f'Succesfully removed {lname} from list!',ctx)
                     else:
-                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name),ctx)
+                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name),ctx)
                     break
                  
         else:
@@ -317,19 +318,19 @@ class Bot(commands.Bot):
                     levels = json.load(infile)
                 i = 0
                 for level in levels:
-                    if level['level'].lower() == mat.group(1).lower():
-                        if level['author'] == ctx.author.id or ctx.author.is_mod:
+                    if level['levelName'].lower() == mat.group(1).lower():
+                        if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
                             if i == 0:
                                 await ctx.send('Cannot remove level due to it currently being played.')
                             else:
-                                lname = level['level']
+                                lname = level['levelName']
                                 levels.pop(i)
                                 with open(path,'w') as outfile:
                                     json.dump(levels, outfile)
 
                                 await self.send_message(f'Succesfully removed {lname} from list!',ctx)
                         else:
-                            await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name),ctx)
+                            await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name),ctx)
                         break
                     i += 1
             else:
@@ -347,7 +348,7 @@ class Bot(commands.Bot):
         i = 1
         if len(levels) > 0:
             for level in levels:
-                out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['level'],level['nick'],level['twitch'],i)
+                out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
                 i += 1
             await self.send_message(out,ctx)
         else:
@@ -361,11 +362,12 @@ class Bot(commands.Bot):
         i = 1
         if len(levels) > 0:
             for level in levels:
-                if level['author'] == ctx.author.id:
-                    out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['level'],level['nick'],level['twitch'],i)
+                if level['twitchID'] == ctx.author.id:
+                    out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
                 i += 1
             if len(out) > 0:
                 await self.send_message(out,ctx)
+            else:
                 await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
         else:
             await ctx.send('The queue is currently empty.')
@@ -382,7 +384,7 @@ class Bot(commands.Bot):
         with open(path,'r') as infile:
             levels = json.load(infile)
         if len(levels) > 0:
-            await self.send_message('The current level is "{0}" by "{1}" submitted by "{2}" link {3}.'.format(levels[0]['level'],levels[0]['nick'],levels[0]['twitch'],levels[0]['link']),ctx)
+            await self.send_message('The current level is "{0}" by "{1}" submitted by "{2}" link {3}.'.format(levels[0]['levelName'],levels[0]['levelMakerName'],levels[0]['submitterName'],levels[0]['link']),ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
