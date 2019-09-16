@@ -285,28 +285,51 @@ class Bot(commands.Bot):
             
     @commands.command(name='remove',aliases=['delete'])
     async def remove(self,ctx):
-        mat = search(r"\s(.+)",ctx.content)
+        mat = findall(r"""(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])""", ctx.content, IGNORECASE)
         if mat:
-            with open(path,'r') as infile:
+            with open(path, 'r') as infile:
                 levels = json.load(infile)
             i = 0
             for level in levels:
-                if level['level'].lower() == mat.group(1).lower():
+                if level['link'].lower() == mat.group(1).lower():
                     if level['author'] == ctx.author.id or ctx.author.is_mod:
                         if i == 0:
                             await ctx.send('Cannot remove level due to it currently being played.')
                         else:
+                            lname = level['level']
                             levels.pop(i)
                             with open(path,'w') as outfile:
                                 json.dump(levels, outfile)
 
-                            await self.send_message(f'Succesfully removed {mat.group(1)} from list!',ctx)
+                            await self.send_message(f'Succesfully removed {lname} from list!',ctx)
                     else:
                         await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name),ctx)
                     break
-                i += 1
+                 
         else:
-            await ctx.send(f'Invalid syntax, !remove [link or level name]')
+            mat = search(r"\s(.+)",ctx.content)
+            if mat:
+                with open(path,'r') as infile:
+                    levels = json.load(infile)
+                i = 0
+                for level in levels:
+                    if level['level'].lower() == mat.group(1).lower():
+                        if level['author'] == ctx.author.id or ctx.author.is_mod:
+                            if i == 0:
+                                await ctx.send('Cannot remove level due to it currently being played.')
+                            else:
+                                lname = level['level']
+                                levels.pop(i)
+                                with open(path,'w') as outfile:
+                                    json.dump(levels, outfile)
+
+                                await self.send_message(f'Succesfully removed {lname} from list!',ctx)
+                        else:
+                            await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['twitch'], ctx.author.display_name),ctx)
+                        break
+                    i += 1
+            else:
+                await ctx.send(f'Invalid syntax, !remove [link or level name]')
     
     @commands.command(name='list',aliases=['queue','q'])
     async def list(self,ctx):
@@ -319,6 +342,23 @@ class Bot(commands.Bot):
                 out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['level'],level['nick'],level['twitch'],i)
                 i += 1
             await self.send_message(out,ctx)
+        else:
+            await ctx.send('The queue is currently empty.')
+
+    @commands.command(name='mylist',aliases=['myqueue','myq','mq'])
+    async def mylist(self,ctx):
+        with open(path,'r') as infile:
+            levels = json.load(infile)
+        out = ""
+        i = 1
+        if len(levels) > 0:
+            for level in levels:
+                if level['author'] == ctx.author.id:
+                    out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['level'],level['nick'],level['twitch'],i)
+                i += 1
+            if len(out) > 0:
+                await self.send_message(out,ctx)
+                await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
