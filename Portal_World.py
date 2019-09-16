@@ -281,7 +281,11 @@ class Bot(commands.Bot):
             else:
                 await ctx.send('Error finding level, is the url correct?')
         else:
-            await ctx.send('Invalid syntax, !add [level url]')
+            mat = findall(f"{self.settings[4]}([\\w]+)\\s",ctx.content)
+            if mat:
+                await ctx.send(f'Invalid syntax, {self.settings[4]}{mat[0]} [level url]')
+            else:
+                await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
             
     @commands.command(name='remove',aliases=['delete'])
     async def remove(self,ctx):
@@ -329,7 +333,11 @@ class Bot(commands.Bot):
                         break
                     i += 1
             else:
-                await ctx.send(f'Invalid syntax, !remove [link or level name]')
+                mat = findall(f"{self.settings[4]}([\\w]+)\\s",ctx.content)
+                if mat:
+                    await ctx.send(f'Invalid syntax, {self.settings[4]}{mat[0]} [link or level name]')
+                else:
+                    await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
     
     @commands.command(name='list',aliases=['queue','q'])
     async def list(self,ctx):
