@@ -13,9 +13,7 @@ try:
     import ctypes
     import steam
     import socketserver
-    import subprocess
     import tkinter
-    import logging
 except ImportError as e:
     input(str(e))
     exit()
