@@ -15,6 +15,7 @@ try:
     import socketserver
     import subprocess
     import tkinter
+    import logging
 except ImportError as e:
     input(str(e))
     exit()
@@ -431,8 +432,16 @@ class run_serv(threading.Thread):
         self.name = name
     
     def run(self):
+
+        class getHandler(http.server.SimpleHTTPRequestHandler):
+            def do_GET(self):
+                http.server.SimpleHTTPRequestHandler.do_GET(self)
+
+            def log_message(self, format, *args):
+                return
+
         try:
-            Handler = http.server.SimpleHTTPRequestHandler
+            Handler = getHandler
             PORT = 8000
             os.chdir(str(path3))
             with socketserver.TCPServer(("", PORT), Handler) as httpd:
@@ -473,8 +482,8 @@ if __name__ == '__main__':
     rui.start()
 
     rui.join()
-    print('ui ded')
+    print('UI closed')
     rserv.stop()
     rserv.join()
-    print('serv ded')
-    print('Close me pls')
+    print('Server closed')
+    print('Please close this window')
