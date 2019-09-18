@@ -117,7 +117,7 @@ class Window(tkinter.Frame):
         with open(path, 'r') as infile:
             levelList = json.load(infile)
         out = {'levelName': level, 'submitterName': submitter,
-               'levelMakerName': creator, 'link': link}
+               'levelMakerName': creator, 'link': link,'twitchID':0}
         if len(levelList) > 0 and top:
             levelList.insert(1, out)
         else:
@@ -153,7 +153,6 @@ class Window(tkinter.Frame):
         with open(path,'r') as infile:
             levelList = json.load(infile)
         if len(levelList) >= 1 and self.no_level:
-            # and str(levelList[0]['levelName']) == str(self.level.get())
             levelList.pop(0)
             self.count = False
             with open(path, 'w') as outfile:
@@ -225,7 +224,7 @@ class Bot(commands.Bot):
     async def help_command(self,ctx):
         if len(self.settings) >= 6:
             if ctx.content.startswith(str(self.settings[4]) + str(self.settings[5])):
-                await self.send_message('{0}add[submit] (level url), {0}remove[/delete] (level name), {0}list[queue,q], {0}current[np]'.format(self.settings[4]),ctx)
+                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name), {0}list[queue,q], {0}mylist[myqueue,myq],{0}current[np]'.format(self.settings[4]), ctx)
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
@@ -348,13 +347,13 @@ class Bot(commands.Bot):
         i = 1
         if len(levels) > 0:
             for level in levels:
-                out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
                 i += 1
             await self.send_message(out,ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
-    @commands.command(name='mylist',aliases=['myqueue','myq','mq'])
+    @commands.command(name='mylist',aliases=['myqueue','myq'])
     async def mylist(self,ctx):
         with open(path,'r') as infile:
             levels = json.load(infile)
@@ -363,7 +362,7 @@ class Bot(commands.Bot):
         if len(levels) > 0:
             for level in levels:
                 if level['twitchID'] == ctx.author.id:
-                    out += "{3} Level: '{0}' - Made by: '{1}' - Submitted by: '{2}'. ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                    out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
                 i += 1
             if len(out) > 0:
                 await self.send_message(out,ctx)
@@ -450,8 +449,7 @@ class run_serv(threading.Thread):
 
     def stop(self):
         thread_id = self.get_id()
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-                                                         ctypes.py_object(SystemExit))
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,ctypes.py_object(SystemExit))
         if res > 1:
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
 
