@@ -195,17 +195,18 @@
                     dataType: 'json',
                     cache: false,
                     success: function (data) {
+                        console.log('Got data succesfully')
                         if (typeof data[0] === 'undefined') {
                             $('.level').html('Use !add to add your level')
                             $('.mb').html('Use !add to add your level')
                         } else {
-                            document.querySelector('.level').innerHTML = data[0].level;
-                            document.querySelector('.mb').innerHTML = data[0].nick;
+                            $('.level').html(data[0].levelName);
+                            $('.mb').html(data[0].levelMakerName);
                         }
+                        carousel();
                     }
                 });
-                carousel();
-            }, 2000);
+            }, 5000);
         });
 
 

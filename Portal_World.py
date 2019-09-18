@@ -447,7 +447,13 @@ class run_serv(threading.Thread):
             with socketserver.TCPServer(("", PORT), Handler) as httpd:
                 httpd.serve_forever()
         finally:
-            httpd.shutdown()
+            while True:
+                try:
+                    httpd.shutdown()
+                except Exception:
+                    pass
+                else:
+                    break
             exit()
 
     def get_id(self):
