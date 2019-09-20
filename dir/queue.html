@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <title>Portal World Queue</title>
+    <link rel="shortcut icon" type="image/ico" href="imgs/favicon.ico" />
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            setInterval(function () {
+                $('#updating').hide();
+                $.ajax({
+                    type: 'GET',
+                    url: 'levels.json',
+                    data: { get_param: 'value' },
+                    dataType: 'json',
+                    cache: false,
+                    error: function(errorThrown = e){
+                        $('#error').text('Error, could not fetch queue...');
+                        $('noLevels').hide();
+                        $('#error').show();
+                    },
+                    success: function (data) {
+                        console.log('Got data succesfully')
+                        $('#error').hide();
+                        if (typeof data[0] === 'undefined') {
+                            $('#queue').hide();
+                            $('#noLevels').show();
+                        } else {
+                            tableContent = '<tr id="queueheader"><th>Level ID</th><th>Level Name</th><th>Level Creator</th><th>Level Submittor</th><th>Level Link</th></tr>';
+                            output = ""
+                            for (i = 0; i < data.length; i++) {
+                                output = output.concat('<tr><td>',i + 1,'</td><td>',data[i].levelName,'</td><td>',data[i].levelMakerName,'</td><td>',data[i].submitterName,'</td><td>',data[i].levelLink,'</td></tr>');
+                            }
+                            tableContent = tableContent.concat(output)
+                            $('#queue').html(tableContent);
+                            $('#noLevels').hide();
+                            $('#queue').show();
+                        }
+                    }
+                });
+            }, 2000);
+        });
+    </script>
+    <style>
+        * {
+            font-family: Arial;
+        }
+
+        body {
+            background: rgba(0, 0, 0, 0);
+        }
+
+        .maincontainer {
+            margin-top:0%;
+            padding: 25px;
+            margin-left: auto;
+            margin-right: auto;
+            background: rgba(240, 240, 240, 0.90);
+            color: rgb(10, 10, 10);
+            height: 100%;
+            width: 80%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            text-align: center;
+            font-size: 15pt;
+            -webkit-box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.2), -1px 0px 5px 0px rgba(0, 0, 0, 0.2);
+            -moz-box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.2), -1px 0px 5px 0px rgba(0, 0, 0, 0.2);
+            box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.2), -1px 0px 5px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .commands{
+			border-collapse: collapse;
+			margin-left: auto;
+			margin-right: auto;
+			overflow-x: auto;
+		}
+
+        .commands td{
+			border-top: 2px solid darkgrey;
+			text-align: left;
+			padding-right: 50px;
+			padding-left: 50px;
+		}
+
+    </style>
+</head>
+
+<body>
+    <div class='maincontainer'>
+        <h1 id="updating">Updating...</h1>
+        <h1 id="error" style='display: none'></h1>
+        <h1 id="noLevels" style='display:none;'>No levels in queue</h1>
+        <table id="queue" class="commands">  
+        </table>
+    </div>
+</body>
+
+</html>

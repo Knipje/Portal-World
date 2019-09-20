@@ -14,6 +14,7 @@ try:
     import steam
     import socketserver
     import tkinter
+    import webbrowser
 except ImportError as e:
     input(str(e))
     exit()
@@ -67,8 +68,13 @@ class Window(tkinter.Frame):
             side="top", fill="none", pady=5, padx=5)
         tkinter.Button(self, text="Input level manually", command=self.new_window).pack(
             side="top", fill="none", pady=5, padx=5)
+        tkinter.Button(self, text="View queue", command=self.open_queue).pack(
+            side="top", fill="none", pady=5, padx=5)
         tkinter.Button(self, text="Clear list", command=self.clear_list).pack(
             side="top", fill="none", pady=5, padx=5)
+
+    def open_queue(self):
+        webbrowser.open('localhost:8000/queue.html')
 
     def new_window(self):
         self.t = tkinter.Toplevel(self)
@@ -177,7 +183,7 @@ class Bot(commands.Bot):
         self.user_count = mat[3]
         self.settings = mat
         try:
-            super().__init__(irc_token=mat[0],prefix=mat[4], nick=mat[1], initial_channels=[mat[2]])
+            super().__init__(irc_token=mat[0],prefix=mat[5], nick=mat[1], initial_channels=[mat[2]])
         except AuthenticationError:
             print('settings.txt not filled in correctly. Please close this window and check you settings.')
 
@@ -221,9 +227,9 @@ class Bot(commands.Bot):
         raise error
 
     async def help_command(self,ctx):
-        if len(self.settings) >= 6:
-            if ctx.content.startswith(str(self.settings[4]) + str(self.settings[5])):
-                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name), {0}list[queue,q], {0}mylist[myqueue,myq],{0}current[np]'.format(self.settings[4]), ctx)
+        if len(self.settings) >= 7:
+            if ctx.content.startswith(str(self.settings[5]) + str(self.settings[6])):
+                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name), {0}list[queue,q], {0}mylist[myqueue,myq],{0}current[np]'.format(self.settings[5]), ctx)
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
@@ -280,9 +286,9 @@ class Bot(commands.Bot):
             else:
                 await ctx.send('Error finding level, is the url correct?')
         else:
-            mat = findall(f"{self.settings[4]}([\\w]+)\\s",ctx.content)
+            mat = findall(f"{self.settings[5]}([\\w]+)\\s",ctx.content)
             if mat:
-                await ctx.send(f'Invalid syntax, {self.settings[4]}{mat[0]} [level url]')
+                await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [level url]')
             else:
                 await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
             
@@ -332,9 +338,9 @@ class Bot(commands.Bot):
                         break
                     i += 1
             else:
-                mat = findall(f"{self.settings[4]}([\\w]+)\\s",ctx.content)
+                mat = findall(f"{self.settings[5]}([\\w]+)\\s",ctx.content)
                 if mat:
-                    await ctx.send(f'Invalid syntax, {self.settings[4]}{mat[0]} [link or level name]')
+                    await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link or level name]')
                 else:
                     await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
     
@@ -345,10 +351,20 @@ class Bot(commands.Bot):
         out = ""
         i = 1
         if len(levels) > 0:
-            for level in levels:
-                out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
-                i += 1
-            await self.send_message(out,ctx)
+            if len(levels) <= int(self.settings[4]):
+                for level in levels:
+                    out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                    i += 1
+                await self.send_message(out,ctx)
+            else:
+                for level in levels:
+                    if i <= int(self.settings[4]):
+                        out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                    i += 1
+                if i > int(self.settings[4]):
+                    ileft = i - int(self.settings[4])
+                    out += f" And {ileft} more levels in queue."
+                await self.send_message(out,ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
@@ -359,14 +375,28 @@ class Bot(commands.Bot):
         out = ""
         i = 1
         if len(levels) > 0:
-            for level in levels:
-                if level['twitchID'] == ctx.author.id:
-                    out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
-                i += 1
-            if len(out) > 0:
-                await self.send_message(out,ctx)
+            if len(levels) <= int(self.settings[4]):
+                for level in levels:
+                    if level['twitchID'] == ctx.author.id:
+                        out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                    i += 1
+                if len(out) > 0:
+                    await self.send_message(out,ctx)
+                else:
+                    await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
             else:
-                await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
+                for level in levels:
+                    if i <= int(self.settings[4]):
+                        if level['twitchID'] == ctx.author.id:
+                            out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                    i += 1
+                if i > int(self.settings[4]):
+                    ileft = i - int(self.settings[4])
+                    out += f" And {ileft} more levels in queue."
+                if len(out) > 0:
+                    await self.send_message(out,ctx)
+                else:
+                    await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
         else:
             await ctx.send('The queue is currently empty.')
 
@@ -405,7 +435,7 @@ with open(path3 + '/def.txt', 'r') as infile:
 with open(path3 + '/settings.txt', 'r') as infile:
     settings = infile.read()
     mat = findall(r'"(.+?)"', settings)
-    if len(mat) < 5 or default == settings:
+    if len(mat) < 6 or default == settings:
         input('Error, please fill settings.txt completely in first. ')
         exit()
 
