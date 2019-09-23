@@ -19,6 +19,7 @@
                     error: function(errorThrown = e){
                         $('#error').text('Error, could not fetch queue...');
                         $('noLevels').hide();
+                            $('#queue').hide();
                         $('#error').show();
                     },
                     success: function (data) {
@@ -31,12 +32,19 @@
                             tableContent = '<tr id="queueheader"><th>Level ID</th><th>Level Name</th><th>Level Creator</th><th>Level Submittor</th><th>Level Link</th></tr>';
                             output = ""
                             for (i = 0; i < data.length; i++) {
-                                output = output.concat('<tr><td>',i + 1,'</td><td>',data[i].levelName,'</td><td>',data[i].levelMakerName,'</td><td>',data[i].submitterName,'</td><td>',data[i].levelLink,'</td></tr>');
+                                if(data[i] != false){
+                                    output = output.concat('<tr><td>',i + 1,'</td><td>',data[i].levelName,'</td><td>',data[i].levelMakerName,'</td><td>',data[i].submitterName,'</td><td><a href="',data[i].link,'">',data[i].link,'</a></td></tr>');
+                                }
                             }
-                            tableContent = tableContent.concat(output)
-                            $('#queue').html(tableContent);
-                            $('#noLevels').hide();
-                            $('#queue').show();
+                            if (output != ""){
+                                tableContent = tableContent.concat(output)
+                                $('#queue').html(tableContent);
+                                $('#noLevels').hide();
+                                $('#queue').show();
+                            } else {
+                                $('#queue').hide();
+                                $('#noLevels').show();
+                            }
                         }
                     }
                 });

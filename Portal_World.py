@@ -37,6 +37,19 @@ class Window(tkinter.Frame):
         self.twitch = tkinter.StringVar(self, value='No levels in queue')
         self.author = tkinter.StringVar(self, value='No levels in queue')
         self.link = tkinter.StringVar(self, value='No levels in queue')
+        levels = json.loads(open(path).read())
+        try:
+            if levels[len(levels) - 1] != False:
+                self.lock = tkinter.StringVar(self, value='Lock queue')
+                self.locked = False
+            else:
+                self.lock = tkinter.StringVar(self, value='Unlock queue')
+                self.locked = True
+        except IndexError:
+            self.lock = tkinter.StringVar(self, value='Lock queue')
+            self.locked = False
+            pass
+
         self.no_level = True
         with open(path,'r') as infile:
             self.update_texts(json.load(infile))
@@ -72,38 +85,60 @@ class Window(tkinter.Frame):
             side="top", fill="none", pady=5, padx=5)
         tkinter.Button(self, text="Clear list", command=self.clear_list).pack(
             side="top", fill="none", pady=5, padx=5)
+        tkinter.Button(self, textvariable=self.lock, command=self.lock_unlock).pack(
+            side="top", fill="none", pady=5, padx=5)
 
     def open_queue(self):
-        webbrowser.open('localhost:8000/queue.html')
+        webbrowser.open('http://localhost:8000/queue.html')
+
+    def lock_unlock(self):
+        with open(path,'r') as infile:
+            levels = json.loads(infile.read())
+        if self.locked:
+            self.lock.set('Lock queue')
+            levels.pop(len(levels) - 1)
+            self.locked = False
+        else:
+            self.lock.set('Unlock queue')
+            levels.append(False)
+            self.locked = True
+        with open(path,'w') as outfile:
+            json.dump(levels,outfile)
 
     def new_window(self):
         self.t = tkinter.Toplevel(self)
         self.t.wm_title("Input level info")
         self.t.iconbitmap(favicon)
-        tkinter.Label(self.t, text='Level name:').pack(
-            side="top", fill="both", pady=5, padx=2)
-        self.new_level = tkinter.StringVar(None)
-        tkinter.Entry(self.t, textvariable=self.new_level).pack()
-        tkinter.Label(self.t, text='Level creator:').pack(
-            side="top", fill="both", pady=5, padx=2)
-        self.new_creator = tkinter.StringVar(None)
-        tkinter.Entry(self.t, textvariable=self.new_creator).pack()
-        tkinter.Label(self.t, text='Level submitter:').pack(
-            side="top", fill="both", pady=5, padx=2)
-        self.new_submitter = tkinter.StringVar(None)
-        if self.channel_name:
-            self.new_submitter.set(self.channel_name)
-        tkinter.Entry(self.t, textvariable=self.new_submitter).pack()
-        tkinter.Label(self.t, text='Level link:').pack(
-            side="top", fill="both", pady=5, padx=2)
-        self.new_link = tkinter.StringVar(None)
-        tkinter.Entry(self.t, textvariable=self.new_link).pack()
-        tkinter.Button(self.t, text="Submit as next level", command=lambda: self.submit_new(
-            True)).pack(side="top", fill="both", pady=5, padx=50)
-        tkinter.Button(self.t, text="Submit to queue", command=lambda: self.submit_new(
-            False)).pack(side="top", fill="both", pady=5, padx=50)
-        tkinter.Button(self.t, text="Cancel", command=lambda: self.t.destroy()).pack(
-            side="top", fill="both", pady=5, padx=50)
+        if not self.locked:
+            tkinter.Label(self.t, text='Level name:').pack(
+                side="top", fill="both", pady=5, padx=2)
+            self.new_level = tkinter.StringVar(None)
+            tkinter.Entry(self.t, textvariable=self.new_level).pack()
+            tkinter.Label(self.t, text='Level creator:').pack(
+                side="top", fill="both", pady=5, padx=2)
+            self.new_creator = tkinter.StringVar(None)
+            tkinter.Entry(self.t, textvariable=self.new_creator).pack()
+            tkinter.Label(self.t, text='Level submitter:').pack(
+                side="top", fill="both", pady=5, padx=2)
+            self.new_submitter = tkinter.StringVar(None)
+            if self.channel_name:
+                self.new_submitter.set(self.channel_name)
+            tkinter.Entry(self.t, textvariable=self.new_submitter).pack()
+            tkinter.Label(self.t, text='Level link:').pack(
+                side="top", fill="both", pady=5, padx=2)
+            self.new_link = tkinter.StringVar(None)
+            tkinter.Entry(self.t, textvariable=self.new_link).pack()
+            tkinter.Button(self.t, text="Submit as next level", command=lambda: self.submit_new(
+                True)).pack(side="top", fill="both", pady=5, padx=50)
+            tkinter.Button(self.t, text="Submit to queue", command=lambda: self.submit_new(
+                False)).pack(side="top", fill="both", pady=5, padx=50)
+            tkinter.Button(self.t, text="Cancel", command=lambda: self.t.destroy()).pack(
+                side="top", fill="both", pady=5, padx=50)
+        else:
+            tkinter.Label(self.t, text="Queue is locked, unlock if you'd like to add levels.").pack(
+                side="top", fill="both", pady=5, padx=2)
+            tkinter.Button(self.t, text="Cancel", command=lambda: self.t.destroy()).pack(
+                side="top", fill="both", pady=5, padx=50)
 
     def submit_new(self, top):
         self.t.destroy()
@@ -131,7 +166,7 @@ class Window(tkinter.Frame):
             json.dump(levelList, outfile)
 
     def update_texts(self,level):
-        if len(level) == 0:
+        if len(level) == 0 or level[0] == False:
             self.level.set('No levels in queue')
             self.twitch.set('No levels in queue')
             self.author.set('No levels in queue')
@@ -179,7 +214,6 @@ class Bot(commands.Bot):
             if len(mat) < 5 or default == settings:
                 print('Error, please fill settings.txt completely in first.')
                 exit()
-        self.move = False
         self.user_count = mat[3]
         self.settings = mat
         try:
@@ -189,7 +223,7 @@ class Bot(commands.Bot):
 
     def close(self):
         os.system('exit')
-
+     
     # Events don't need decorators when subclassed
     async def event_ready(self):
         print(f'Ready | {self.nick}')
@@ -229,11 +263,19 @@ class Bot(commands.Bot):
     async def help_command(self,ctx):
         if len(self.settings) >= 7:
             if ctx.content.startswith(str(self.settings[5]) + str(self.settings[6])):
-                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name), {0}list[queue,q], {0}mylist[myqueue,myq],{0}current[np]'.format(self.settings[5]), ctx)
+                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name or url), {0}promote (level name or url),{0}list[queue,q], {0}mylist[myqueue,myq],{0}current[np]'.format(self.settings[5]), ctx)
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
     async def add(self, ctx):
+        levels = json.loads(open(path).read())
+        try:
+            if levels[len(levels) - 1] == False:
+                await self.send_message("Couldn't add level due to the queue being locked",ctx)
+                return
+        except IndexError:
+            pass
+
         mat = findall(r"""(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])""", ctx.content,IGNORECASE)
         if mat:
             with open(path,'r') as infile:
@@ -381,7 +423,7 @@ class Bot(commands.Bot):
                                 levels.insert(1, level)
                                 with open(path, 'w') as outfile:
                                     json.dump(levels, outfile)
-                                    
+
                                 await self.send_message(f'{lname} is now up next!', ctx)
                         break
                     i += 1
@@ -399,6 +441,8 @@ class Bot(commands.Bot):
         out = ""
         i = 1
         if len(levels) > 0:
+            if levels[len(levels) - 1] == False:
+                levels = levels[:len(levels) - 1]
             if len(levels) <= int(self.settings[4]):
                 for level in levels:
                     out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
@@ -423,6 +467,8 @@ class Bot(commands.Bot):
         out = ""
         i = 1
         if len(levels) > 0:
+            if levels[len(levels) - 1] == False:
+                levels = levels[:len(levels) - 1]
             if len(levels) <= int(self.settings[4]):
                 for level in levels:
                     if level['twitchID'] == ctx.author.id:
@@ -459,7 +505,7 @@ class Bot(commands.Bot):
     async def current(self,ctx):
         with open(path,'r') as infile:
             levels = json.load(infile)
-        if len(levels) > 0:
+        if len(levels) > 0 and levels[0] != False:
             await self.send_message('The current level is "{0}" by "{1}" submitted by "{2}" link {3}.'.format(levels[0]['levelName'],levels[0]['levelMakerName'],levels[0]['submitterName'],levels[0]['link']),ctx)
         else:
             await ctx.send('The queue is currently empty.')

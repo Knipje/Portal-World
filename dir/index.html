@@ -199,6 +199,9 @@
                         if (typeof data[0] === 'undefined') {
                             $('.level').html('Use !add to add your level')
                             $('.mb').html('Use !add to add your level')
+                        } else if (data[0] == false){
+                            $('.level').html('No levels left in queue')
+                            $('.mb').html('No levels left in queue')
                         } else {
                             $('.level').html(data[0].levelName);
                             $('.mb').html(data[0].levelMakerName);
