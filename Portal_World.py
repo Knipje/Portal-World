@@ -19,190 +19,6 @@ except ImportError as e:
     input(str(e))
     exit()
 
-class Window(tkinter.Frame):
-
-    def __init__(self, master=None):
-        with open(path3 + '/settings.txt', 'r') as infile:
-            channel_name = infile.readlines()[2]
-            mat = findall(r'"(.+?)"', channel_name)
-            if len(mat) == 1:
-                self.channel_name = mat[0]
-            else:
-                self.channel_name = None
-
-
-        tkinter.Frame.__init__(self, master)
-        self.master = master
-        self.level = tkinter.StringVar(self, value='No levels in queue')
-        self.twitch = tkinter.StringVar(self, value='No levels in queue')
-        self.author = tkinter.StringVar(self, value='No levels in queue')
-        self.link = tkinter.StringVar(self, value='No levels in queue')
-        levels = json.loads(open(path).read())
-        try:
-            if levels[len(levels) - 1] != False:
-                self.lock = tkinter.StringVar(self, value='Lock queue')
-                self.locked = False
-            else:
-                self.lock = tkinter.StringVar(self, value='Unlock queue')
-                self.locked = True
-        except IndexError:
-            self.lock = tkinter.StringVar(self, value='Lock queue')
-            self.locked = False
-            pass
-
-        self.no_level = True
-        with open(path,'r') as infile:
-            self.update_texts(json.load(infile))
-        self.init_window()
-
-    def init_window(self):
-        self.master.title("Portal World")
-        self.pack(expand=1)
-        tkinter.Label(self, text='Level name:').pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, textvariable=self.level, wraplength=390).pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, text='Level creator:').pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, textvariable=self.author, wraplength=390).pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, text='Level submitter:').pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, textvariable=self.twitch, wraplength=390).pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, text='Level link:').pack(
-            side="top", fill="none", pady=5, padx=2)
-        tkinter.Label(self, textvariable=self.link, wraplength=390).pack(
-            side="top", fill="none", pady=5, padx=2)
-
-        tkinter.Button(self, text='Copy link', command=self.get_link).pack(
-            side="top", fill="none", pady=5, padx=5)
-        tkinter.Button(self, text='Next level', command=self.next).pack(
-            side="top", fill="none", pady=5, padx=5)
-        tkinter.Button(self, text="Input level manually", command=self.new_window).pack(
-            side="top", fill="none", pady=5, padx=5)
-        tkinter.Button(self, text="View queue", command=self.open_queue).pack(
-            side="top", fill="none", pady=5, padx=5)
-        tkinter.Button(self, text="Clear list", command=self.clear_list).pack(
-            side="top", fill="none", pady=5, padx=5)
-        tkinter.Button(self, textvariable=self.lock, command=self.lock_unlock).pack(
-            side="top", fill="none", pady=5, padx=5)
-
-    def open_queue(self):
-        webbrowser.open('http://localhost:8000/queue.html')
-
-    def lock_unlock(self):
-        with open(path,'r') as infile:
-            levels = json.loads(infile.read())
-        if self.locked:
-            self.lock.set('Lock queue')
-            levels.pop(len(levels) - 1)
-            self.locked = False
-        else:
-            self.lock.set('Unlock queue')
-            levels.append(False)
-            self.locked = True
-        with open(path,'w') as outfile:
-            json.dump(levels,outfile)
-
-    def new_window(self):
-        self.t = tkinter.Toplevel(self)
-        self.t.wm_title("Input level info")
-        self.t.iconbitmap(favicon)
-        if not self.locked:
-            tkinter.Label(self.t, text='Level name:').pack(
-                side="top", fill="both", pady=5, padx=2)
-            self.new_level = tkinter.StringVar(None)
-            tkinter.Entry(self.t, textvariable=self.new_level).pack()
-            tkinter.Label(self.t, text='Level creator:').pack(
-                side="top", fill="both", pady=5, padx=2)
-            self.new_creator = tkinter.StringVar(None)
-            tkinter.Entry(self.t, textvariable=self.new_creator).pack()
-            tkinter.Label(self.t, text='Level submitter:').pack(
-                side="top", fill="both", pady=5, padx=2)
-            self.new_submitter = tkinter.StringVar(None)
-            if self.channel_name:
-                self.new_submitter.set(self.channel_name)
-            tkinter.Entry(self.t, textvariable=self.new_submitter).pack()
-            tkinter.Label(self.t, text='Level link:').pack(
-                side="top", fill="both", pady=5, padx=2)
-            self.new_link = tkinter.StringVar(None)
-            tkinter.Entry(self.t, textvariable=self.new_link).pack()
-            tkinter.Button(self.t, text="Submit as next level", command=lambda: self.submit_new(
-                True)).pack(side="top", fill="both", pady=5, padx=50)
-            tkinter.Button(self.t, text="Submit to queue", command=lambda: self.submit_new(
-                False)).pack(side="top", fill="both", pady=5, padx=50)
-            tkinter.Button(self.t, text="Cancel", command=lambda: self.t.destroy()).pack(
-                side="top", fill="both", pady=5, padx=50)
-        else:
-            tkinter.Label(self.t, text="Queue is locked, unlock if you'd like to add levels.").pack(
-                side="top", fill="both", pady=5, padx=2)
-            tkinter.Button(self.t, text="Cancel", command=lambda: self.t.destroy()).pack(
-                side="top", fill="both", pady=5, padx=50)
-
-    def submit_new(self, top):
-        self.t.destroy()
-        level = self.new_level.get()
-        creator = self.new_creator.get()
-        submitter = self.new_submitter.get()
-        link = self.new_link.get()
-        if not level:
-            level = "None"
-        if not creator:
-            creator = "None"
-        if not submitter:
-            submitter = "None"
-        if not link:
-            link = "None"
-        with open(path, 'r') as infile:
-            levelList = json.load(infile)
-        out = {'levelName': level, 'submitterName': submitter,
-               'levelMakerName': creator, 'link': link,'twitchID':0}
-        if len(levelList) > 0 and top:
-            levelList.insert(1, out)
-        else:
-            levelList.append(out)
-        with open(path, 'w') as outfile:
-            json.dump(levelList, outfile)
-
-    def update_texts(self,level):
-        if len(level) == 0 or level[0] == False:
-            self.level.set('No levels in queue')
-            self.twitch.set('No levels in queue')
-            self.author.set('No levels in queue')
-            self.link.set('No levels in queue')
-            self.no_level = False
-        else:
-            self.level.set(level[0]['levelName'])
-            self.twitch.set(level[0]['submitterName'])
-            self.author.set(level[0]['levelMakerName'])
-            self.link.set(level[0]['link'])
-            self.no_level = True
-
-    def clear_list(self):
-        with open(path, 'w') as outfile:
-            outfile.write('[]')
-        self.update_texts([])
-
-    def get_link(self):
-        self.clipboard_clear()
-        self.clipboard_append(self.link.get())
-        self.update()
-
-    def next(self):
-        with open(path,'r') as infile:
-            levelList = json.load(infile)
-        if len(levelList) >= 1 and self.no_level:
-            levelList.pop(0)
-            self.count = False
-            with open(path, 'w') as outfile:
-                json.dump(levelList, outfile)
-        self.update_texts(levelList)
-
-    def stop(self):
-        self.master.destroy()
-
-
 class Bot(commands.Bot):
 
     def __init__(self):
@@ -552,14 +368,50 @@ class run_serv(threading.Thread):
     def __init__(self, name):
         threading.Thread.__init__(self)
         self.name = name
-    
+        
     def run(self):
 
         class getHandler(http.server.SimpleHTTPRequestHandler):
+            
             def do_GET(self):
-                http.server.SimpleHTTPRequestHandler.do_GET(self)
+                try:
+                    http.server.SimpleHTTPRequestHandler.do_GET(self)
+                    mat = findall(r"/dashboard.html\?removeLevelId=([\w]+)", self.path)
+                    if mat:
+                        try:
+                            removeIndex = int(mat[0])
+                        except ValueError:
+                            if mat[0] == 'all':
+                                with open(path,'w') as outfile:
+                                    outfile.write('[]')
+                            elif mat[0] == 'lock':
+                                with open(path, 'r') as infile:
+                                    levels = json.loads(infile.read())
+                                    try:
+                                        if levels[len(levels) - 1] == False:
+                                            levels.pop(len(levels) - 1)
+                                        else:
+                                            levels.append(False)
+                                    except IndexError:
+                                        levels.append(False)
+                                    with open(path, 'w') as outfile:
+                                        json.dump(levels, outfile)
+                        else:
+                            with open(path,'r') as infile:
+                                levels = json.load(infile)
+                            levels.pop(removeIndex)
+                            with open(path,'w') as outfile:
+                                json.dump(levels,outfile)
+                except Exception:
+                    pass
+
+            def do_HEAD(self):
+                http.server.SimpleHTTPRequestHandler.do_HEAD(self)
 
             def log_message(self, format, *args):
+                return
+
+            def log_error(self, format, *args):
                 return
 
         try:
@@ -590,28 +442,11 @@ class run_serv(threading.Thread):
         if res > 1:
             ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
 
-def run_ui():
-
-    root = tkinter.Tk()
-    root.iconbitmap(favicon)
-    root.minsize(400,200)
-    root.resizable(False, True)
-    app = Window(root)
-    app.mainloop()
-    
 if __name__ == '__main__':
 
     rbot = run_bot('twitch')
     rserv = run_serv('localhost')
-    rui = threading.Thread(target=run_ui)
     rbot.start()
-    time.sleep(1)
     rserv.start()
-    rui.start()
-
-    rui.join()
-    print('UI closed')
-    rserv.stop()
-    rserv.join()
-    print('Server closed')
-    print('Please close this window')
+    time.sleep(1)
+    webbrowser.open('http://localhost:8000/dashboard.html')
