@@ -34,7 +34,7 @@
 						locked = false;
 						for (i = 0; i < data.length; i++) {
 							if (data[i] != false) {
-								output = output.concat('<tr><td>', i + 1, '</td><td>', data[i].levelName, '</td><td>', data[i].levelMakerName, '</td><td>', data[i].submitterName, '</td><td><a href="', data[i].link, '">', data[i].link, '</a></td><td><a title="Remove level." style="text-decoration: none; color: red;" href="?removeLevelId=', i, '">X</a></td></tr>');
+								output = output.concat('<tr><td>', i + 1, '</td><td>', data[i].levelName, '</td><td>', data[i].levelMakerName, '</td><td>', data[i].submitterName, '</td><td><a target="_blank" href="', data[i].link, '">', data[i].link, '</a></td><td><a title="Remove level." style="text-decoration: none; color: red;" href="?removeLevelId=', i, '">X</a></td></tr>');
 							} else {
 								locked = true;
 							}

@@ -150,56 +150,77 @@ class Bot(commands.Bot):
             else:
                 await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
             
-    @commands.command(name='remove',aliases=['delete'])
-    async def remove(self,ctx):
+    @commands.command(name='remove', aliases=['delete'])
+    async def remove(self, ctx):
         mat = findall(r"""(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])""", ctx.content, IGNORECASE)
         if mat:
             with open(path, 'r') as infile:
                 levels = json.load(infile)
             i = 0
             for level in levels:
-                if level['link'].lower() == mat.group(1).lower():
+                if level['link'].lower() == mat[0].lower():
                     if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
                         if i == 0:
                             await ctx.send('Cannot remove level due to it currently being played.')
                         else:
                             lname = level['levelName']
                             levels.pop(i)
-                            with open(path,'w') as outfile:
+                            with open(path, 'w') as outfile:
                                 json.dump(levels, outfile)
 
-                            await self.send_message(f'Succesfully removed {lname} from list!',ctx)
+                            await self.send_message(f'Succesfully removed {lname} from list!', ctx)
                     else:
-                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name),ctx)
-                    break         
-        else:
-            mat = search(r"\s(.+)",ctx.content)
-            if mat:
-                with open(path,'r') as infile:
-                    levels = json.load(infile)
-                i = 0
-                for level in levels:
-                    if level['levelName'].lower() == mat.group(1).lower():
-                        if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
-                            if i == 0:
-                                await ctx.send('Cannot remove level due to it currently being played.')
-                            else:
-                                lname = level['levelName']
-                                levels.pop(i)
-                                with open(path,'w') as outfile:
-                                    json.dump(levels, outfile)
+                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name), ctx)
+                    break
+                i += 1
 
-                                await self.send_message(f'Succesfully removed {lname} from list!',ctx)
+        else:
+            mat = search(r"\s(\d)", ctx.content)
+            if mat:
+                with open(path, 'r') as infile:
+                    levels = json.load(infile)
+                    i = int(mat.group(1)) - 1
+                    if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
+                        if i == 0:
+                            await ctx.send('Cannot remove level due to it currently being played.')
+                        elif i + 1 > len(levels):
+                            await ctx.send('Invalid level id')
                         else:
-                            await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name),ctx)
-                        break
-                    i += 1
+                            lname = level['levelName']
+                            levels.pop(i)
+                            with open(path, 'w') as outfile:
+                                json.dump(levels, outfile)
+
+                            await self.send_message(f'Succesfully removed {lname} from list!', ctx)
+                    else:
+                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name), ctx)
             else:
-                mat = findall(f"{self.settings[5]}([\\w]+)\\s",ctx.content)
+                mat = search(r"\s(.+)", ctx.content)
                 if mat:
-                    await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link or level name]')
+                    with open(path, 'r') as infile:
+                        levels = json.load(infile)
+                    i = 0
+                    for level in levels:
+                        if level['levelName'].lower() == mat.group(1).lower():
+                            if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
+                                if i == 0:
+                                    await ctx.send('Cannot remove level due to it currently being played.')
+                                else:
+                                    lname = level['levelName']
+                                    levels.pop(i)
+                                    with open(path, 'w') as outfile:
+                                        json.dump(levels, outfile)
+                                    await self.send_message(f'Succesfully removed {lname} from list!', ctx)
+                            else:
+                                await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name), ctx)
+                            break
+                        i += 1
                 else:
-                    await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
+                    mat = findall(f"{self.settings[5]}([\\w]+)\\s", ctx.content)
+                    if mat:
+                        await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link, song name or song id]')
+                    else:
+                        await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
     
     @commands.command(name='promote')
     async def promote(self,ctx):
@@ -209,46 +230,67 @@ class Bot(commands.Bot):
                 levels = json.load(infile)
             i = 0
             for level in levels:
-                if level['link'].lower() == mat.group(1).lower():
+                if level['link'].lower() == mat[0].lower():
                     if ctx.author.is_mod:
                         if i == 0:
-                            await ctx.send('Cannot remove level due to it currently being played.')
+                            await ctx.send('Cannot promote level due to it currently being played.')
                         else:
                             lname = level['levelName']
                             levels.pop(i)
-                            levels.insert(1,level)
-                            with open(path,'w') as outfile:
+                            levels.insert(1, level)
+                            with open(path, 'w') as outfile:
                                 json.dump(levels, outfile)
 
-                            await self.send_message(f'{lname} is now up next!',ctx)
+                            await self.send_message(f'{lname} is now up next!', ctx)
                     break
+                i += 1
         else:
-            mat = search(r"\s(.+)",ctx.content)
+            mat = search(r"\s(\d)", ctx.content)
             if mat:
-                with open(path,'r') as infile:
+                with open(path, 'r') as infile:
                     levels = json.load(infile)
-                i = 0
-                for level in levels:
-                    if level['levelName'].lower() == mat.group(1).lower():
-                        if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
-                            if i == 0:
-                                await ctx.send('Cannot remove level due to it currently being played.')
-                            else:
-                                lname = level['levelName']
-                                levels.pop(i)
-                                levels.insert(1, level)
-                                with open(path, 'w') as outfile:
-                                    json.dump(levels, outfile)
-
-                                await self.send_message(f'{lname} is now up next!', ctx)
-                        break
-                    i += 1
+                    i = int(mat.group(1)) - 1
+                    if ctx.author.is_mod:
+                        if i == 0:
+                            await ctx.send('Cannot promote level due to it currently being played.')
+                        elif i + 1 > len(levels):
+                            await ctx.send('Invalid level id')
+                        else:
+                            level = levels[i]
+                            lname = level['levelName']
+                            levels.pop(i)
+                            levels.insert(1, level)
+                            with open(path, 'w') as outfile:
+                                json.dump(levels, outfile)
+                            await self.send_message(f'{lname} is now up next!', ctx)
             else:
-                mat = findall(f"{self.settings[5]}([\\w]+)\\s",ctx.content)
+                mat = search(r"\s(.+)", ctx.content)
                 if mat:
-                    await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link or level name]')
+                    with open(path, 'r') as infile:
+                        levels = json.load(infile)
+                    i = 0
+                    for level in levels:
+                        if level['levelName'].lower() == mat.group(1).lower():
+                            if ctx.author.is_mod:
+                                if i == 0:
+                                    await ctx.send('Cannot promote level due to it currently being played.')
+                                else:
+                                    lname = level['levelName']
+                                    levels.pop(i)
+                                    levels.insert(1, level)
+                                    with open(path, 'w') as outfile:
+                                        json.dump(levels, outfile)
+
+                                    await self.send_message(f'{lname} is now up next!', ctx)
+                            break
+                        i += 1
                 else:
-                    await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
+                    mat = findall(
+                        f"{self.settings[5]}([\\w]+)\\s", ctx.content)
+                    if mat:
+                        await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link, song name or song id]')
+                    else:
+                        await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
 
     @commands.command(name='list',aliases=['queue','q'])
     async def list(self,ctx):
@@ -399,7 +441,8 @@ class run_serv(threading.Thread):
                         else:
                             with open(path,'r') as infile:
                                 levels = json.load(infile)
-                            levels.pop(removeIndex)
+                            if levels[removeIndex] != False:
+                                levels.pop(removeIndex)
                             with open(path,'w') as outfile:
                                 json.dump(levels,outfile)
                 except Exception:
