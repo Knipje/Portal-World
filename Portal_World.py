@@ -79,7 +79,7 @@ class Bot(commands.Bot):
     async def help_command(self,ctx):
         if len(self.settings) >= 7:
             if ctx.content.startswith(str(self.settings[5]) + str(self.settings[6])):
-                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name or url), {0}promote (level name or url),{0}list[queue,q], {0}mylist[myqueue,myq],{0}current[np]'.format(self.settings[5]), ctx)
+                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name, url or id), {0}list[queue,q], {0}mylist[myqueue,myq], {0}current[np]'.format(self.settings[5]), ctx)
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
@@ -136,7 +136,7 @@ class Bot(commands.Bot):
                         with open(path,'w') as outfile:
                             data.append({'link':levelLink,'levelName':levelName,'twitchID':ctx.author.id,'levelMakerName':authorName,'submitterName':ctx.author.display_name})
                             json.dump(data,outfile)
-                        await self.send_message(f'Succesfully added {levelName} to the queue!',ctx)
+                        await self.send_message(f'Succesfully added {levelName} to the queue at place {len(data)}!',ctx)
                     else:
                         await ctx.send('Error with steam api')
                 else:
@@ -218,7 +218,7 @@ class Bot(commands.Bot):
                 else:
                     mat = findall(f"{self.settings[5]}([\\w]+)\\s", ctx.content)
                     if mat:
-                        await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link, song name or song id]')
+                        await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link, level name or level id]')
                     else:
                         await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
     
@@ -285,12 +285,7 @@ class Bot(commands.Bot):
                             break
                         i += 1
                 else:
-                    mat = findall(
-                        f"{self.settings[5]}([\\w]+)\\s", ctx.content)
-                    if mat:
-                        await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [link, song name or song id]')
-                    else:
-                        await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
+                    self.send_message(f'Invalid syntax: {self.settings[5]}promote [level name, url or id]',ctx)
 
     @commands.command(name='list',aliases=['queue','q'])
     async def list(self,ctx):
@@ -351,6 +346,50 @@ class Bot(commands.Bot):
                     await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
         else:
             await ctx.send('The queue is currently empty.')
+
+    @commands.command(name='lock')
+    async def lock(self, ctx):
+        if ctx.author.is_mod:
+            with open(path, 'r') as infile:
+                levels = json.load(infile)
+            if len(levels) > 0:
+                if levels[len(levels) - 1] == False:
+                    await self.send_message('Queue was already locked', ctx)
+                    return
+                else:
+                    levels.append(False)
+                    with open(path, 'w') as outfile:
+                        json.dump(levels, outfile)
+                    await self.send_message('Succesfully locked queue', ctx)
+
+    @commands.command(name='unlock')
+    async def unlock(self, ctx):
+        if ctx.author.is_mod:
+            with open(path, 'r') as infile:
+                levels = json.load(infile)
+            if len(levels) > 0:
+                if levels[len(levels) - 1] == False:
+                    levels.pop(len(levels) - 1)
+                    with open(path, 'w') as outfile:
+                        json.dump(levels, outfile)
+                    await self.send_message('Succesfully unlocked queue', ctx)
+                else:
+                    await self.send_message('Queue was already unlocked', ctx)
+                return
+
+    @commands.command(name='next', aliases=['skip'])
+    async def next(self, ctx):
+        if ctx.author.is_mod:
+            with open(path, 'r') as infile:
+                levels = json.load(infile)
+            if len(levels) > 0:
+                if levels[0] != False:
+                    levels.pop(0)
+                    with open(path, 'w') as outfile:
+                        json.dump(levels, outfile)
+                    await self.send_message('Succesfully skipped level', ctx)
+                    return
+            await self.send_message("Couldn't skip level due to the queue being empty", ctx)
 
     @commands.command(name='clear',aliases=['reset','empty','init'])
     async def clear(self,ctx):
