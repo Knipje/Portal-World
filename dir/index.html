@@ -110,6 +110,15 @@
             margin: auto auto;
         }
 
+        .lock{
+            float: right;
+            height: 0;
+        }
+
+        .lock *{
+            margin-top: -0.25em;
+        }
+
         .level,
         .mb {
             height: 2rem;
@@ -159,6 +168,7 @@
                 <div>
                     <span class="level">Use !add to add your level</span>
                     <span class="level"></span>
+                    <span class="lock"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M18 10v-4c0-3.313-2.687-6-6-6s-6 2.687-6 6v4h-3v14h18v-14h-3zm-10 0v-4c0-2.206 1.794-4 4-4s4 1.794 4 4v4h-8z"/></svg></span>
                 </div>
             </div>
 
@@ -196,12 +206,19 @@
                     cache: false,
                     success: function (data) {
                         console.log('Got data succesfully')
+                        if (data.indexOf(false) >= 0) {
+                            $('.lock').show();
+                            locked = true;
+                        }else{
+                            $('.lock').hide();
+                            locked = false;
+                        };
                         if (typeof data[0] === 'undefined') {
-                            $('.level').html('Use !add to add your level')
-                            $('.mb').html('Use !add to add your level')
+                            $('.level').html('Use !add to add your level');
+                            $('.mb').html('Use !add to add your level');
                         } else if (data[0] == false) {
-                            $('.level').html('No levels left in queue')
-                            $('.mb').html('No levels left in queue')
+                            $('.level').html('No levels left in queue');
+                            $('.mb').html('No levels left in queue');
                         } else {
                             $('.level').html(data[0].levelName);
                             $('.mb').html(data[0].levelMakerName);
@@ -209,9 +226,8 @@
                         carousel();
                     }
                 });
-            }, 5000);
+            }, 2000);
         });
-
 
         function carousel() {
             document.querySelectorAll('.level')[1].innerHTML = document.querySelectorAll('.level')[0].innerHTML;
@@ -233,9 +249,6 @@
                 document.querySelectorAll('.mb')[1].classList.add('gone');
             }
         }
-
-        carousel();
-
 
     </script>
 </body>
