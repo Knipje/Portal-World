@@ -5,7 +5,6 @@ try:
     import json
     from re import search,findall,IGNORECASE,MULTILINE 
     from sys import argv
-    import sys
     import os
     import threading
     import time
@@ -13,7 +12,6 @@ try:
     import ctypes
     import steam
     import socketserver
-    import tkinter
     import webbrowser
 except ImportError as e:
     input(str(e))
@@ -361,6 +359,11 @@ class Bot(commands.Bot):
                     with open(path, 'w') as outfile:
                         json.dump(levels, outfile)
                     await self.send_message('Succesfully locked queue', ctx)
+            else:
+                levels.append(False)
+                with open(path, 'w') as outfile:
+                    json.dump(levels, outfile)
+                await self.send_message('Succesfully locked queue', ctx)
 
     @commands.command(name='unlock')
     async def unlock(self, ctx):
@@ -375,7 +378,8 @@ class Bot(commands.Bot):
                     await self.send_message('Succesfully unlocked queue', ctx)
                 else:
                     await self.send_message('Queue was already unlocked', ctx)
-                return
+            else:
+                await self.send_message('Queue was already unlocked', ctx)
 
     @commands.command(name='next', aliases=['skip'])
     async def next(self, ctx):
