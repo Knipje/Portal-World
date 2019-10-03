@@ -48,8 +48,6 @@
 
 						if (output != "") {
 							tableContent = tableContent.concat(output);
-
-
 							$('#queue').html(tableContent);
 							$('#noLevels').hide();
 							$('#queue').show();
@@ -64,22 +62,36 @@
 
 		$(document).ready(function () {
 			update();
-			//setInterval(function () {
-			//	update();
-			//}, 1000);
+			setInterval(function () {
+				update();
+			}, 1000);
 
 			$('#lconfirm').click(function(){
-				try {
-					if(locked == true){
-						alert('Unable to add level due to locked queue.');
-					}else{
+
+				const regex = /([^a-zA-Z0-9_.-])/;
+				const str = $('#lname').val().concat($('#lauth').val(),$('#lsub').val(),$('#llink').val());
+				let m;
+
+				if ((m = regex.exec(str)) !== null) {
+					r = confirm('Warning, due to non word characters (eg @$(),)in the input fields some characters will not appear properly, do you want to continue?');
+				}else{
+					r = true;
+				}
+
+				if (r == true){
+					try {
+						if(locked == true){
+							alert('Unable to add level due to locked queue.');
+						}else{
+							$('#theform').submit();
+							$('inputdiv').hide();
+						}
+					} catch (ReferenceError) {
 						$('#theform').submit();
 						$('inputdiv').hide();
 					}
-				} catch (ReferenceError) {
-					$('#theform').submit();
-					$('inputdiv').hide();
 				}
+				
 			});
 
 		});
