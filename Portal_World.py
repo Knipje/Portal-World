@@ -459,7 +459,12 @@ class run_serv(threading.Thread):
         class getHandler(http.server.SimpleHTTPRequestHandler):
             
             def do_GET(self):
-                http.server.SimpleHTTPRequestHandler.do_GET(self)
+                try:
+                    http.server.SimpleHTTPRequestHandler.do_GET(self)
+                except ConnectionAbortedError:
+                    pass
+                except FileNotFoundError:
+                    pass
                 try:
                     mat = findall(r"/dashboard.html\?removeLevelId=([\w]+)", self.path)
                     if mat:
@@ -489,6 +494,18 @@ class run_serv(threading.Thread):
                             with open(path,'w') as outfile:
                                 json.dump(levels,outfile)
                     else:
+                        mat = findall(r"/dashboard.html\?promoteLevelId=([\w]+)", self.path)
+                        if mat:
+                            with open(path, 'r') as infile:
+                                levels = json.load(infile)
+                                i = int(mat[0]) - 1
+                                if i != 0 or i + 1 < len(levels):
+                                    level = levels[i]
+                                    levels.pop(i)
+                                    levels.insert(1, level)
+                                    with open(path, 'w') as outfile:
+                                        json.dump(levels, outfile)
+
                         mat = findall(r"\/dashboard\.html\?levelName=(.*?)&levelMakerName=(.*?)&submitterName=(.*?)&link=(.*?)&d=", self.path)
                         if mat:
                             link = mat[0][3]
