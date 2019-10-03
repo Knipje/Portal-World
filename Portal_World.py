@@ -459,8 +459,8 @@ class run_serv(threading.Thread):
         class getHandler(http.server.SimpleHTTPRequestHandler):
             
             def do_GET(self):
+                http.server.SimpleHTTPRequestHandler.do_GET(self)
                 try:
-                    http.server.SimpleHTTPRequestHandler.do_GET(self)
                     mat = findall(r"/dashboard.html\?removeLevelId=([\w]+)", self.path)
                     if mat:
                         try:
@@ -488,6 +488,21 @@ class run_serv(threading.Thread):
                                 levels.pop(removeIndex)
                             with open(path,'w') as outfile:
                                 json.dump(levels,outfile)
+                    else:
+                        mat = findall(r"\/dashboard\.html\?levelName=(.*?)&levelMakerName=(.*?)&submitterName=(.*?)&link=(.*?)&d=", self.path)
+                        if mat:
+                            link = mat[0][3]
+                            levelName = mat[0][0].replace('+',' ')
+                            levelMakerName = mat[0][1].replace('+', ' ')
+                            submitterName = mat[0][2].replace('+', ' ')
+                            
+                            l = {'link':link,'levelName':levelName,'twitchID':None,'levelMakerName':levelMakerName,'submitterName':submitterName}
+                            with open(path,'r') as infile:
+                                levels = json.load(infile)
+                            levels.append(l)
+                            with open(path,'w') as outfile:
+                                json.dump(levels,outfile)
+
                 except Exception:
                     pass
 

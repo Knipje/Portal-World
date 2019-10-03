@@ -27,10 +27,10 @@
 					if (typeof data[0] === 'undefined') {
 						$('#queue').hide();
 						$('#noLevels').show();
-						$('#lock').html('Lock queue')
+						$('#lock').html('Lock queue');
 					} else {
 						tableContent = '<tr id="queueheader"><th>Level ID</th><th>Level Name</th><th>Level Creator</th><th>Level Submittor</th><th>Level Link</th></tr>';
-						output = ""
+						output = "";
 						locked = false;
 						for (i = 0; i < data.length; i++) {
 							if (data[i] != false) {
@@ -41,13 +41,13 @@
 						}
 						
 						if (locked == false){
-							$('#lock').html('Lock queue')
+							$('#lock').html('Lock queue');
 						} else {
-							$('#lock').html('Unlock queue')
+							$('#lock').html('Unlock queue');
 						}
 
 						if (output != "") {
-							tableContent = tableContent.concat(output)
+							tableContent = tableContent.concat(output);
 
 
 							$('#queue').html(tableContent);
@@ -64,9 +64,24 @@
 
 		$(document).ready(function () {
 			update();
-			setInterval(function () {
-				update();
-			}, 500);
+			//setInterval(function () {
+			//	update();
+			//}, 1000);
+
+			$('#lconfirm').click(function(){
+				try {
+					if(locked == true){
+						alert('Unable to add level due to locked queue.');
+					}else{
+						$('#theform').submit();
+						$('inputdiv').hide();
+					}
+				} catch (ReferenceError) {
+					$('#theform').submit();
+					$('inputdiv').hide();
+				}
+			});
+
 		});
 	</script>
 	<style>
@@ -86,7 +101,7 @@
 			background: rgba(240, 240, 240, 0.90);
 			color: rgb(10, 10, 10);
 			height: 100%;
-			width: 80%;
+			width: 95%;
 			overflow-y: auto;
 			overflow-x: hidden;
 			text-align: center;
@@ -123,10 +138,22 @@
 
 		.nextLevel{
 			text-decoration: none;
+			cursor: pointer;
 		}
 
 		.nextLevel *:hover{
 			background-color: lightgray;
+		}
+
+		.inputdiv{
+			display: none;
+			color: #0394fc;
+			border: 3px solid gray;
+			border-radius: 5px;
+			padding: 2px;
+			margin: 10px;
+			margin-left: auto;
+			margin-right: auto;
 		}
 
 	</style>
@@ -141,6 +168,29 @@
 				<a class="nextLevel" target="_blank" href="http://localhost:8000"><h2>Open stream bar</h2></a>
 				<a class="nextLevel" target="_blank" href="http://localhost:8000/queue.html"><h2>Open queue</h2></a>
 				<a class="nextLevel" href="http://localhost:8000/dashboard.html?removeLevelId=lock"><h2 id='lock'></h2></a>
+				<a class="nextLevel" onclick='$(".inputdiv").toggle()'><h2>Input level</h2></a>
+				<table class="inputdiv">
+					<tr>
+						<form method="GET" action="" id="theform">
+							<td>
+								<input id="lname" name="levelName" placeholder="Level name"/>
+							</td>
+							<td>
+								<input id="lauth" name="levelMakerName" placeholder="Level author"/>
+							</td>
+							<td>
+								<input id="lsub" name="submitterName" placeholder="Level submitter"/>
+							</td>
+							<td>
+								<input id="llink" name="link" placeholder="Level link"/>
+							</td>
+							<td>
+								<input name="d" style="display:none;"/>
+								<div class="nextLevel" style="margin: 10px;" id="lconfirm"><h3>Add to queue</h3></div>
+							</td>
+						</form>
+					</tr>
+				</table>
 			</div>
 			<h1 id="updating">Updating...</h1>
 			<h1 id="error" style='display: none'></h1>
