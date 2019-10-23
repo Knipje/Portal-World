@@ -82,63 +82,50 @@ class Bot(commands.Bot):
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
     async def add(self, ctx):
-        levels = json.loads(open(path).read())
+        with open(path,'r') as infile:
+            data = json.load(infile)
         try:
-            if levels[len(levels) - 1] == False:
+            if data[len(data) - 1] == False:
                 await self.send_message("Couldn't add level due to the queue being locked",ctx)
                 return
         except IndexError:
             pass
 
-        mat = findall(r"""(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])""", ctx.content,IGNORECASE)
+        mat = search(r"""(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])\?id=(\d*)""", ctx.content, IGNORECASE)
         if mat:
-            with open(path,'r') as infile:
-                data = json.load(infile)
+            levelLink = mat.string
+            authId = mat.group(1)
+
+            levelJson = steam.webapi.post(interface='ISteamRemoteStorage',method='GetPublishedFileDetails',params={'itemcount': 1, 'publishedfileids[0]':authId})
             
-            levelLink = mat[0]
-            while True:
-                try:
-                    req = requests.get(levelLink)
-                except Exception as e:
-                    print("Failed to get level link, retrying... {}".format(e))
+            if levelJson:
+                levelName = levelJson['response']['publishedfiledetails'][0]['title']
+                sId = levelJson['response']['publishedfiledetails'][0]['creator']
+
+                uinfo = steam.webapi.get(interface='ISteamUser',method='GetPlayerSummaries',version=2,params={'key':'ABCE07D6D3E64ECBB4733E9E3DA30892','steamids':sId})
+                if uinfo:
+                    authorName = uinfo['response']['players'][0]['personaname']
+
+                    i = 0
+                    for level in data:
+                        if len(data) > 2:
+                            if level['twitchID'] == ctx.author.id:
+                                i += 1
+                        if level['link'].lower() == levelLink.lower():
+                            await self.send_message('Unable to add level due to {0} already being in the queue!'.format(levelName),ctx)
+                            return
+                
+                    if len(data) > int(self.user_count) - 1:
+                        if i >= int(self.user_count):
+                            await self.send_message('Unable to add level due to {0} already having {1} levels in the queue!'.format(ctx.author.display_name,self.user_count),ctx)
+                            return
+
+                    with open(path,'w') as outfile:
+                        data.append({'link':levelLink,'levelName':levelName,'twitchID':ctx.author.id,'levelMakerName':authorName,'submitterName':ctx.author.display_name})
+                        json.dump(data,outfile)
+                    await self.send_message(f'Succesfully added {levelName} to the queue at place {len(data)}!',ctx)
                 else:
-                    break
-            if req.ok:
-                site = str(req.content)
-                mat = findall(r"""<div class="[^"]*?workshopItemTitle[^"]*?">(.*?)<\/div>|<div class="[^"]*?workshopItemTitle[^"]*?">(.*?)<\/div>|<a class="friendBlockLinkOverlay" href="(.*?)">""",site,IGNORECASE | MULTILINE)
-                if mat:
-                    levelName = mat[0][0]
-                    authorLink = mat[1][2]
-    
-                    aid = steam.steamid.from_url(authorLink)
-                    request = 'https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=ABCE07D6D3E64ECBB4733E9E3DA30892&steamids=' + str(aid.as_64)
-
-                    uinfo = steam.webapi.webapi_request(request)
-                    if uinfo:
-                        authorName = uinfo['response']['players'][0]['personaname']
-
-                        i = 0
-                        for level in data:
-                            if len(data) > 2:
-                                if level['twitchID'] == ctx.author.id:
-                                    i += 1
-                            if level['link'].lower() == levelLink.lower():
-                                await self.send_message('Unable to add level due to {0} already being in the queue!'.format(levelName),ctx)
-                                return
-                    
-                        if len(data) > int(self.user_count) - 1:
-                            if i >= int(self.user_count):
-                                await self.send_message('Unable to add level due to {0} already having {1} levels in the queue!'.format(ctx.author.display_name,self.user_count),ctx)
-                                return
-
-                        with open(path,'w') as outfile:
-                            data.append({'link':levelLink,'levelName':levelName,'twitchID':ctx.author.id,'levelMakerName':authorName,'submitterName':ctx.author.display_name})
-                            json.dump(data,outfile)
-                        await self.send_message(f'Succesfully added {levelName} to the queue at place {len(data)}!',ctx)
-                    else:
-                        await ctx.send('Error with steam api')
-                else:
-                    await ctx.send('Error finding level, is the url correct?')
+                    await ctx.send('Error with steam api')
             else:
                 await ctx.send('Error finding level, is the url correct?')
         else:
@@ -146,7 +133,7 @@ class Bot(commands.Bot):
             if mat:
                 await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [level url]')
             else:
-                await ctx.send('You should not be seeing this, something went terribly wrong. Anyways, incorrect syntax.')
+                await ctx.send('Invalid syntax.')
             
     @commands.command(name='remove', aliases=['delete'])
     async def remove(self, ctx):
@@ -316,6 +303,7 @@ class Bot(commands.Bot):
         with open(path,'r') as infile:
             levels = json.load(infile)
         out = ""
+        lInQueue = False
         i = 1
         if len(levels) > 0:
             if levels[len(levels) - 1] == False:
@@ -324,8 +312,9 @@ class Bot(commands.Bot):
                 for level in levels:
                     if level['twitchID'] == ctx.author.id:
                         out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                        lInQueue = True
                     i += 1
-                if len(out) > 0:
+                if out != "" and lInQueue:
                     await self.send_message(out,ctx)
                 else:
                     await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
@@ -334,11 +323,13 @@ class Bot(commands.Bot):
                     if i <= int(self.settings[4]):
                         if level['twitchID'] == ctx.author.id:
                             out += "{3} - Level: '{0}' - Made by: '{1}' - Submitted by: '{2}' ".format(level['levelName'],level['levelMakerName'],level['submitterName'],i)
+                            lInQueue = True
+                    else:
+                        ileft = i - int(self.settings[4])
+                        out += f" And {ileft} more levels in queue."
+                        break
                     i += 1
-                if i > int(self.settings[4]):
-                    ileft = i - int(self.settings[4])
-                    out += f" And {ileft} more levels in queue."
-                if len(out) > 0:
+                if out != "" and lInQueue:
                     await self.send_message(out,ctx)
                 else:
                     await self.send_message('{} has no levels in the queue.'.format(ctx.author.display_name),ctx)
