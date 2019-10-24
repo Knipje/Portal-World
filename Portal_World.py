@@ -165,20 +165,20 @@ class Bot(commands.Bot):
                 with open(path, 'r') as infile:
                     levels = json.load(infile)
                     i = int(mat.group(1)) - 1
-                    if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
-                        if i == 0:
-                            await ctx.send('Cannot remove level due to it currently being played.')
-                        elif i + 1 > len(levels):
-                            await ctx.send('Invalid level id')
-                        else:
+                    if i == 0:
+                        await ctx.send('Cannot remove level due to it currently being played.')
+                    elif i + 1 > len(levels):
+                        await ctx.send('Invalid level id')
+                    else:
+                        if level['twitchID'] == ctx.author.id or ctx.author.is_mod:
                             lname = level['levelName']
                             levels.pop(i)
                             with open(path, 'w') as outfile:
                                 json.dump(levels, outfile)
 
                             await self.send_message(f'Succesfully removed {lname} from list!', ctx)
-                    else:
-                        await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name), ctx)
+                        else:
+                            await self.send_message('Cannot remove level because {0} submitted it, not {1}.'.format(level['submitterName'], ctx.author.display_name), ctx)
             else:
                 mat = search(r"\s(.+)", ctx.content)
                 if mat:
