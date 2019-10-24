@@ -428,7 +428,7 @@ with open(path3 + '/def.txt', 'r') as infile:
 with open(path3 + '/settings.txt', 'r') as infile:
     settings = infile.read()
     mat = findall(r'"(.+?)"', settings)
-    if len(mat) < 6 or default == settings:
+    if len(mat) < 7 or default == settings:
         input('Error, please fill settings.txt completely in first. ')
         exit()
 
