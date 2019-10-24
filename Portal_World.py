@@ -25,7 +25,7 @@ class Bot(commands.Bot):
         with open(path3 + '/settings.txt', 'r') as infile:
             settings = infile.read()
             mat = findall(r'"(.+?)"', settings)
-            if len(mat) < 5 or default == settings:
+            if len(mat) < 6 or default == settings:
                 print('Error, please fill settings.txt completely in first.')
                 exit()
         self.user_count = mat[3]
@@ -75,9 +75,9 @@ class Bot(commands.Bot):
         raise error
 
     async def help_command(self,ctx):
-        if len(self.settings) >= 7:
-            if ctx.content.startswith(str(self.settings[5]) + str(self.settings[6])):
-                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name, url or id), {0}list[queue,q], {0}mylist[myqueue,myq], {0}current[np]'.format(self.settings[5]), ctx)
+        if len(self.settings) >= 8:
+            if ctx.content.startswith(str(self.settings[5]) + str(self.settings[7])):
+                await self.send_message('{0}add[submit] (level url), {0}remove[delete] (level name, url or id), {0}list[queue,q], {0}mylist[myqueue,myq], {0}current[np]'.format(self.settings[5]), ctx.channel)
 
     # Commands use a different decorator
     @commands.command(name='add',aliases=['submit'])
@@ -101,6 +101,13 @@ class Bot(commands.Bot):
             if levelJson:
                 levelName = levelJson['response']['publishedfiledetails'][0]['title']
                 sId = levelJson['response']['publishedfiledetails'][0]['creator']
+                
+                try:
+                    if int(levelJson['response']['publishedfiledetails'][0]['consumer_app_id']) != int(self.settings[6]):
+                        await self.send_message("Couldn't add item due to it not being for the correct game",ctx)
+                        return
+                except ValueError:
+                    pass
 
                 uinfo = steam.webapi.get(interface='ISteamUser',method='GetPlayerSummaries',version=2,params={'key':'ABCE07D6D3E64ECBB4733E9E3DA30892','steamids':sId})
                 if uinfo:
@@ -133,7 +140,7 @@ class Bot(commands.Bot):
             if mat:
                 await ctx.send(f'Invalid syntax, {self.settings[5]}{mat[0]} [level url]')
             else:
-                await ctx.send('Invalid syntax.')
+                await ctx.send('Invalid syntax')
             
     @commands.command(name='remove', aliases=['delete'])
     async def remove(self, ctx):
