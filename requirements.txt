@@ -6,7 +6,6 @@ sys
 os
 threading
 time
-requests
 ctypes
 steam
 socketserver
