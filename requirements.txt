@@ -1,4 +1,3 @@
 twitchio
 steam
-webbrowser
 socketserver
