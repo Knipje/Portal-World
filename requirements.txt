@@ -1,6 +1,5 @@
 twitchio
-ctypes
 steam
-socketserver
 tkinter
 webbrowser
+socketserver
