@@ -1,5 +1,4 @@
 request
-http
 twitchio
 json
 re
@@ -12,3 +11,4 @@ steam
 socketserver
 tkinter
 webbrowser
+http
