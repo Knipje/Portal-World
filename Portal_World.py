@@ -8,7 +8,6 @@ try:
     import os
     import threading
     import time
-    import requests
     import ctypes
     import steam
     import socketserver
