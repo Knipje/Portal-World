@@ -1,5 +1,4 @@
 twitchio
-re
 ctypes
 steam
 socketserver
