@@ -1,5 +1,4 @@
 twitchio
 steam
-tkinter
 webbrowser
 socketserver
