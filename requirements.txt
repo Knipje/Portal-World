@@ -1,14 +1,7 @@
-request
 twitchio
-json
 re
-sys
-os
-threading
-time
 ctypes
 steam
 socketserver
 tkinter
 webbrowser
-http
